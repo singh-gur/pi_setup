@@ -2,5 +2,5 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
   "defaultThinkingLevel": "medium",
-  "theme": "pi-code"
+  "theme": "oh-p-dark"
 }
