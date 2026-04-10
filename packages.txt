@@ -9,6 +9,6 @@ npm:@ifi/oh-pi-themes
 npm:@eliemessiecode/pi-code-theme
 npm:@haispeed/pi-deck
 npm:pi-ask-user
-npm:pi-lens
-# npm:pi-subagents
+# npm:pi-lens
+npm:pi-subagents
 npm:@ifi/pi-plan
