@@ -19,6 +19,8 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
 └── pi/
     └── agent/
         ├── AGENTS.md
+        ├── prompts/
+        │   └── gitship.md
         └── settings.json
 ```
 
@@ -30,6 +32,10 @@ Add more global pi files under `pi/agent/`, for example:
 - `pi/agent/skills/...`
 - `pi/agent/extensions/...`
 - `pi/agent/themes/...`
+
+Current repo-managed prompts include:
+
+- `/gitship` via `pi/agent/prompts/gitship.md` for staging relevant work, creating a meaningful commit, and pushing while asking for confirmation when concerns are detected
 
 On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default.
 
