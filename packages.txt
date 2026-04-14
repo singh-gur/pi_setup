@@ -12,3 +12,4 @@ npm:pi-ask-user
 # npm:pi-lens
 npm:pi-subagents
 npm:@ifi/pi-plan
+npm:pi-mono-clear
