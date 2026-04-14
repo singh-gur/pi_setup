@@ -6,12 +6,16 @@ SOURCE_PI_DIR="$REPO_DIR/pi/agent"
 TARGET_PI_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 PACKAGES_FILE="$REPO_DIR/packages.txt"
 SKILLS_INSTALL_FILE="$REPO_DIR/skills-install.json"
+MERGE_JSON_SCRIPT="$REPO_DIR/scripts/merge-json.py"
 INSTALL_PI=0
 SYNC_MODE="copy"
 BACKUP_SUFFIX="$(date +%Y%m%d-%H%M%S)"
 PROTECTED_TARGETS=(
   "auth.json"
   "sessions"
+)
+MERGED_JSON_TARGETS=(
+  "settings.json"
 )
 
 log() {
@@ -85,6 +89,43 @@ is_protected_target() {
   return 1
 }
 
+is_merged_json_target() {
+  local relpath="$1"
+  local merged
+  for merged in "${MERGED_JSON_TARGETS[@]}"; do
+    if [[ "$relpath" == "$merged" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+merge_json_file() {
+  local source="$1"
+  local target="$2"
+
+  command -v python3 >/dev/null 2>&1 || die "python3 is required to merge $target"
+  [[ -f "$MERGE_JSON_SCRIPT" ]] || die "missing JSON merge helper: $MERGE_JSON_SCRIPT"
+
+  local temp_file
+  temp_file="$(mktemp)"
+
+  python3 "$MERGE_JSON_SCRIPT" "$source" "$target" "$temp_file"
+
+  if [[ -f "$target" ]] && cmp -s "$temp_file" "$target" 2>/dev/null; then
+    rm -f "$temp_file"
+    log "ok $target"
+    return
+  fi
+
+  if [[ -e "$target" ]]; then
+    backup_existing "$target"
+  fi
+
+  mv "$temp_file" "$target"
+  log "merged $source -> $target"
+}
+
 sync_entry() {
   local source="$1"
   local target="$2"
@@ -96,6 +137,14 @@ sync_entry() {
   fi
 
   ensure_parent "$target"
+
+  if is_merged_json_target "$relpath"; then
+    if [[ -L "$target" ]]; then
+      backup_existing "$target"
+    fi
+    merge_json_file "$source" "$target"
+    return
+  fi
 
   if [[ -L "$target" ]]; then
     local current_target=""
