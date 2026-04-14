@@ -63,10 +63,11 @@ chmod +x install.sh
 Or use the helper `justfile`:
 
 ```bash
-just              # show available recipes
-just install      # run ./install.sh
-just add-provider # run the auth helper
-just check        # validate scripts and JSON config
+just                # show available recipes
+just install        # run ./install.sh
+just install-skills # run ./scripts/install-skills.sh
+just add-provider   # run the auth helper
+just check          # validate scripts and JSON config
 ```
 
 Options:
@@ -83,7 +84,7 @@ Add or replace an API-key provider entry in `~/.pi/agent/auth.json` interactivel
 ./scripts/add-provider-api-key.sh
 ```
 
-If `skills-install.json` exists, the installer also attempts to install each configured external skill with:
+If `skills-install.json` exists, the installer also attempts to install each configured external skill by calling `./scripts/install-skills.sh`:
 
 ```bash
 npx skills add <repo> --skill <skill> -g --agent pi -y
@@ -120,7 +121,7 @@ Declare external skills in `skills-install.json` as a JSON object mapping reposi
 }
 ```
 
-During `./install.sh`, each configured skill is installed globally for the `pi` agent via the `skills` CLI. If `jq` or `npx` is missing, external skill installation is skipped with a warning.
+During `./install.sh`, each configured skill is installed globally for the `pi` agent via the `skills` CLI through `./scripts/install-skills.sh --optional`. If you only want to refresh external skills, run `just install-skills` or `./scripts/install-skills.sh`. If `jq` or `npx` is missing, external skill installation is skipped with a warning.
 
 ## Shared pi packages
 

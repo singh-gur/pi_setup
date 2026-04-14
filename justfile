@@ -12,6 +12,10 @@ help:
 install:
     ./install.sh
 
+# Install only the external skills listed in skills-install.json.
+install-skills:
+    ./scripts/install-skills.sh
+
 # Sync repo-managed pi config using symlinks instead of copying files.
 install-symlink:
     ./install.sh --symlink
@@ -28,6 +32,7 @@ add-provider:
 check:
     bash -n install.sh
     bash -n scripts/add-provider-api-key.sh
+    bash -n scripts/install-skills.sh
     jq empty skills-install.json
 
 # Print the current external skills config.

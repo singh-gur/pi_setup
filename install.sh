@@ -178,78 +178,7 @@ sync_pi_packages() {
 }
 
 sync_external_skills() {
-  if [[ ! -f "$SKILLS_INSTALL_FILE" ]]; then
-    log "no skills-install.json found, skipping external skills"
-    return
-  fi
-
-  if ! command -v jq >/dev/null 2>&1; then
-    warn "jq is not installed; skipping external skills from $SKILLS_INSTALL_FILE"
-    return
-  fi
-
-  if ! command -v npx >/dev/null 2>&1; then
-    warn "npx is not available; skipping external skills from $SKILLS_INSTALL_FILE"
-    return
-  fi
-
-  local skill_entries
-  if ! skill_entries="$(jq -r '
-    if type != "object" then
-      error("skills-install.json must contain a JSON object")
-    else
-      to_entries[]?
-      | .key as $url
-      | if (.value | type) != "array" then
-          error("Expected an array of skills for \($url)")
-        else
-          .value[]?
-          | if type != "string" then
-              error("Invalid skill name for \($url)")
-            else
-              . as $skill
-              | ($skill | gsub("^\\s+|\\s+$"; "")) as $trimmed_skill
-              | if ($trimmed_skill | length) == 0 then
-                  error("Invalid skill name for \($url)")
-                else
-                  "\($url)\t\($trimmed_skill)"
-                end
-            end
-        end
-    end
-  ' "$SKILLS_INSTALL_FILE")"; then
-    die "failed to parse $SKILLS_INSTALL_FILE"
-  fi
-
-  if [[ -z "$skill_entries" ]]; then
-    log "no external skills configured in $SKILLS_INSTALL_FILE"
-    return
-  fi
-
-  local attempted=0
-  local installed=0
-  local failed=0
-  local repo_url
-  local skill_name
-
-  log "syncing external skills from $SKILLS_INSTALL_FILE"
-  while IFS=$'\t' read -r repo_url skill_name; do
-    [[ -n "$repo_url" ]] || continue
-
-    attempted=$((attempted + 1))
-    log "npx skills add $repo_url --skill $skill_name -g --agent pi -y"
-    if npx --yes skills add "$repo_url" --skill "$skill_name" -g --agent pi -y </dev/null; then
-      installed=$((installed + 1))
-    else
-      failed=$((failed + 1))
-      warn "failed to install external skill '$skill_name' from $repo_url, continuing"
-    fi
-  done <<< "$skill_entries"
-
-  log "external skills installed: $installed/$attempted"
-  if [[ "$failed" -gt 0 ]]; then
-    warn "external skill installs failed: $failed"
-  fi
+  "$REPO_DIR/scripts/install-skills.sh" --file "$SKILLS_INSTALL_FILE" --optional
 }
 
 parse_args() {
