@@ -213,17 +213,33 @@ sync_pi_packages() {
     return
   fi
 
+  local installed_packages_output
+  if ! installed_packages_output="$(pi list)"; then
+    warn "failed to list installed pi packages; skipping packages.txt sync"
+    return
+  fi
+
+  local package_name
+  declare -A installed_packages=()
+  while IFS= read -r package_name; do
+    [[ -n "$package_name" ]] || continue
+    installed_packages["$package_name"]=1
+  done < <(printf '%s\n' "$installed_packages_output" | sed -n 's/^  \([^[:space:]].*\)$/\1/p')
+
   log "syncing shared pi packages from $PACKAGES_FILE"
   while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%%#*}"
     line="$(printf '%s' "$line" | xargs 2>/dev/null || true)"
     [[ -n "$line" ]] || continue
-    log "pi install $line"
-    pi install "$line"
-  done < "$PACKAGES_FILE"
 
-  log "running pi update"
-  pi update
+    if [[ -n "${installed_packages[$line]:-}" ]]; then
+      log "pi update $line"
+      pi update "$line"
+    else
+      log "pi install $line"
+      pi install "$line"
+    fi
+  done < "$PACKAGES_FILE"
 }
 
 sync_external_skills() {
