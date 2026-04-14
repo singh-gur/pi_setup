@@ -16,8 +16,11 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
 ```text
 .
 ├── install.sh
+├── justfile
 ├── packages.txt
 ├── skills-install.json
+├── scripts/
+│   └── add-provider-api-key.sh
 └── pi/
     └── agent/
         ├── AGENTS.md
@@ -46,6 +49,8 @@ Protected target paths that are never modified by the installer:
 - `~/.pi/agent/auth.json`
 - `~/.pi/agent/sessions/`
 
+The installer never changes `auth.json`. If you explicitly want to add an API-key provider entry, use `./scripts/add-provider-api-key.sh`.
+
 ## Usage
 
 From inside this repo:
@@ -55,12 +60,27 @@ chmod +x install.sh
 ./install.sh
 ```
 
+Or use the helper `justfile`:
+
+```bash
+just              # show available recipes
+just install      # run ./install.sh
+just add-provider # run the auth helper
+just check        # validate scripts and JSON config
+```
+
 Options:
 
 ```bash
 ./install.sh --symlink            # symlink instead of copy
 ./install.sh --install-pi         # also install/update pi via npm
 ./install.sh --pi-dir ~/.config/pi/agent
+```
+
+Add or replace an API-key provider entry in `~/.pi/agent/auth.json` interactively:
+
+```bash
+./scripts/add-provider-api-key.sh
 ```
 
 If `skills-install.json` exists, the installer also attempts to install each configured external skill with:
@@ -121,6 +141,32 @@ Then rerun:
 ```bash
 ./install.sh
 ```
+
+## Provider auth helper
+
+`./scripts/add-provider-api-key.sh` prompts for a documented provider key and a hidden API key, then updates `~/.pi/agent/auth.json` using the `api_key` auth type expected by pi.
+
+Supported provider keys currently include:
+
+- `anthropic`
+- `azure-openai-responses`
+- `openai`
+- `google`
+- `mistral`
+- `groq`
+- `cerebras`
+- `xai`
+- `openrouter`
+- `vercel-ai-gateway`
+- `zai`
+- `opencode`
+- `opencode-go`
+- `huggingface`
+- `kimi-coding`
+- `minimax`
+- `minimax-cn`
+
+The script preserves other auth entries, backs up any existing `auth.json`, and writes the file with `0600` permissions.
 
 ## Notes
 
