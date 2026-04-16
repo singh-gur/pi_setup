@@ -1,0 +1,14 @@
+{
+  "packages": [
+    "npm:@ifi/oh-pi-themes",
+    "npm:@eliemessiecode/pi-code-theme",
+    "npm:@haispeed/pi-deck",
+    "npm:pi-ask-user",
+    "npm:pi-subagents",
+    "npm:@ifi/pi-plan",
+    "npm:pi-mono-clear",
+    "npm:@zenobius/pi-worktrees",
+    "npm:@codexstar/pi-listen",
+    "npm:@sherif-fanous/pi-catppuccin"
+  ]
+}

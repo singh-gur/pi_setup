@@ -4,10 +4,13 @@ set -euo pipefail
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_PI_DIR="$REPO_DIR/pi/agent"
 TARGET_PI_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
-PACKAGES_FILE="$REPO_DIR/packages.txt"
+PACKAGES_FILE="$REPO_DIR/packages.json"
 SKILLS_INSTALL_FILE="$REPO_DIR/skills-install.json"
 MERGE_JSON_SCRIPT="$REPO_DIR/scripts/merge-json.py"
 INSTALL_PI=0
+CONFIG_ONLY=0
+UPDATE_PACKAGES=0
+UPDATE_SKILLS=0
 SYNC_MODE="copy"
 BACKUP_SUFFIX="$(date +%Y%m%d-%H%M%S)"
 PROTECTED_TARGETS=(
@@ -44,12 +47,18 @@ Options:
   --pi-dir <path>      Override target pi config dir
   --symlink            Symlink files instead of copying them
   --install-pi         Install/update @mariozechner/pi-coding-agent via npm
+  --config-only        Sync only repo-managed pi config files
+  --update-packages    Run pi update for already-installed packages in packages.json
+  --update-skills      Run npx skills update -g before installing missing configured skills
   -h, --help           Show this help
 
 Examples:
   ./install.sh
   ./install.sh --install-pi
   ./install.sh --symlink
+  ./install.sh --config-only
+  ./install.sh --update-packages
+  ./install.sh --update-skills
   ./install.sh --pi-dir ~/.config/pi/agent
 EOF
 }
@@ -204,18 +213,48 @@ sync_pi_config() {
 
 sync_pi_packages() {
   if [[ ! -f "$PACKAGES_FILE" ]]; then
-    log "no packages.txt found, skipping shared pi packages"
+    log "no packages.json found, skipping shared pi packages"
     return
   fi
 
   if ! command -v pi >/dev/null 2>&1; then
-    warn "pi is not available on PATH yet; skipping packages.txt install"
+    warn "pi is not available on PATH yet; skipping packages.json install"
+    return
+  fi
+
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "jq is required to parse $PACKAGES_FILE; skipping shared pi packages"
     return
   fi
 
   local installed_packages_output
   if ! installed_packages_output="$(pi list)"; then
-    warn "failed to list installed pi packages; skipping packages.txt sync"
+    warn "failed to list installed pi packages; skipping packages.json sync"
+    return
+  fi
+
+  local package_entries
+  if ! package_entries="$(jq -r '
+    if type != "object" then
+      error("packages.json must contain a JSON object")
+    elif (.packages | type) != "array" then
+      error("packages.json must contain a packages array")
+    else
+      .packages[]?
+      | if type != "string" then
+          error("packages entries must be strings")
+        else
+          . as $pkg
+          | ($pkg | gsub("^\\s+|\\s+$"; "")) as $trimmed_pkg
+          | if ($trimmed_pkg | length) == 0 then
+              error("packages entries must not be empty")
+            else
+              $trimmed_pkg
+            end
+        end
+    end
+  ' "$PACKAGES_FILE")"; then
+    warn "failed to parse $PACKAGES_FILE; skipping shared pi packages"
     return
   fi
 
@@ -227,23 +266,29 @@ sync_pi_packages() {
   done < <(printf '%s\n' "$installed_packages_output" | sed -n 's/^  \([^[:space:]].*\)$/\1/p')
 
   log "syncing shared pi packages from $PACKAGES_FILE"
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    line="${line%%#*}"
-    line="$(printf '%s' "$line" | xargs 2>/dev/null || true)"
-    [[ -n "$line" ]] || continue
+  while IFS= read -r package_name; do
+    [[ -n "$package_name" ]] || continue
 
-    if [[ -n "${installed_packages[$line]:-}" ]]; then
-      log "pi update $line"
-      pi update "$line"
+    if [[ -n "${installed_packages[$package_name]:-}" ]]; then
+      if [[ "$UPDATE_PACKAGES" -eq 1 ]]; then
+        log "pi update $package_name"
+        pi update "$package_name"
+      else
+        log "skipping installed package $package_name (use --update-packages to update)"
+      fi
     else
-      log "pi install $line"
-      pi install "$line"
+      log "pi install $package_name"
+      pi install "$package_name"
     fi
-  done < "$PACKAGES_FILE"
+  done <<< "$package_entries"
 }
 
 sync_external_skills() {
-  "$REPO_DIR/scripts/install-skills.sh" --file "$SKILLS_INSTALL_FILE" --optional
+  local args=(--file "$SKILLS_INSTALL_FILE" --optional)
+  if [[ "$UPDATE_SKILLS" -eq 1 ]]; then
+    args+=(--update-skills)
+  fi
+  "$REPO_DIR/scripts/install-skills.sh" "${args[@]}"
 }
 
 parse_args() {
@@ -260,6 +305,18 @@ parse_args() {
         ;;
       --install-pi)
         INSTALL_PI=1
+        shift
+        ;;
+      --config-only)
+        CONFIG_ONLY=1
+        shift
+        ;;
+      --update-packages)
+        UPDATE_PACKAGES=1
+        shift
+        ;;
+      --update-skills)
+        UPDATE_SKILLS=1
         shift
         ;;
       -h|--help)
@@ -284,8 +341,11 @@ main() {
 
   install_pi
   sync_pi_config
-  sync_pi_packages
-  sync_external_skills
+
+  if [[ "$CONFIG_ONLY" -ne 1 ]]; then
+    sync_pi_packages
+    sync_external_skills
+  fi
 
   log "done"
   log "next steps: run 'pi', then '/login' or export your provider API key(s)"

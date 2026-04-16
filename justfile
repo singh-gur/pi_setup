@@ -8,9 +8,13 @@ default:
 help:
     @just --list
 
-# Sync repo-managed pi config, shared pi packages, and external skills.
+# Sync repo-managed pi config, install missing shared pi packages, and install external skills.
 install:
     ./install.sh
+
+# Sync only the repo-managed files under pi/agent.
+install-config:
+    ./install.sh --config-only
 
 # Install only the external skills listed in skills-install.json.
 install-skills:
@@ -24,6 +28,10 @@ install-symlink:
 install-with-pi:
     ./install.sh --install-pi
 
+# Sync repo-managed pi config, install missing packages, update installed packages, and install external skills.
+install-full:
+    ./install.sh --update-packages
+
 # Interactively add or replace an API-key provider entry in ~/.pi/agent/auth.json.
 add-provider:
     ./scripts/add-provider-api-key.sh
@@ -33,12 +41,13 @@ check:
     bash -n install.sh
     bash -n scripts/add-provider-api-key.sh
     bash -n scripts/install-skills.sh
+    jq empty packages.json
     jq empty skills-install.json
 
 # Print the current external skills config.
 show-skills:
     jq . skills-install.json
 
-# Print the current shared pi packages list with comments removed.
+# Print the current shared pi packages list.
 show-packages:
-    grep -v '^[[:space:]]*#' packages.txt | sed '/^[[:space:]]*$/d'
+    jq -r '.packages[]' packages.json

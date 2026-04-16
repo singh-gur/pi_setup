@@ -1,5 +1,8 @@
 {
-  "theme": "oh-p-dark",
+  "theme": "catppuccin-macchiato",
   "quietStartup": true,
-  "collapseChangelog": true
+  "collapseChangelog": true,
+  "voice": {
+    "toggleShortcut": "ctrl+shift+l"
+  }
 }

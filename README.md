@@ -6,7 +6,7 @@ This repo is the source of truth for my global pi coding agent setup.
 
 - syncs repo-managed global pi config into `~/.pi/agent`
 - optionally installs or updates `@mariozechner/pi-coding-agent` when requested
-- optionally installs shared pi packages listed in `packages.txt`
+- optionally installs shared pi packages listed in `packages.json`
 - optionally installs external skills declared in `skills-install.json` via the `skills` CLI
 
 It intentionally does **not** touch local machine data like `auth.json` or the `sessions/` folder in the target pi directory.
@@ -17,7 +17,7 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
 .
 ├── install.sh
 ├── justfile
-├── packages.txt
+├── packages.json
 ├── skills-install.json
 ├── scripts/
 │   └── add-provider-api-key.sh
@@ -102,7 +102,7 @@ git pull
 That gives you:
 
 - latest repo-managed config
-- latest unpinned pi packages from `packages.txt`
+- latest unpinned pi packages from `packages.json`
 
 If you also want to install or update pi itself:
 
@@ -125,16 +125,17 @@ During `./install.sh`, each configured skill is installed globally for the `pi` 
 
 ## Shared pi packages
 
-Put one package source per line in `packages.txt`, e.g.
+Declare package sources in `packages.json` for cleaner parsing and JSON tooling support, e.g.
 
-```text
-# npm packages
-npm:@foo/pi-tools
-npm:@bar/pi-theme@1.2.3
-
-# git packages
-git:github.com/user/pi-package
-https://github.com/user/another-pi-package
+```json
+{
+  "packages": [
+    "npm:@foo/pi-tools",
+    "npm:@bar/pi-theme@1.2.3",
+    "git:github.com/user/pi-package",
+    "https://github.com/user/another-pi-package"
+  ]
+}
 ```
 
 Then rerun:
