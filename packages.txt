@@ -6,5 +6,5 @@ npm:pi-subagents
 npm:@ifi/pi-plan
 npm:pi-mono-clear
 npm:@zenobius/pi-worktrees
-# npm:@codexstar/pi-listen
+npm:@codexstar/pi-listen
 # npm:@samfp/pi-memory
