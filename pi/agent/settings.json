@@ -1,4 +1,5 @@
 {
   "theme": "oh-p-dark",
-  "quietStartup": true
+  "quietStartup": true,
+  "collapseChangelog": true
 }
