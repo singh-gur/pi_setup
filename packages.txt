@@ -1,15 +1,10 @@
-# Shared pi packages.
-# One source per line. Lines starting with # are ignored.
-# Examples:
-# npm:@foo/pi-tools
-# npm:@foo/pi-theme@1.2.3
-# git:github.com/user/repo
-# https://github.com/user/repo
 npm:@ifi/oh-pi-themes
 npm:@eliemessiecode/pi-code-theme
 npm:@haispeed/pi-deck
 npm:pi-ask-user
-# npm:pi-lens
 npm:pi-subagents
 npm:@ifi/pi-plan
 npm:pi-mono-clear
+npm:@zenobius/pi-worktrees
+# npm:@codexstar/pi-listen
+# npm:@samfp/pi-memory
