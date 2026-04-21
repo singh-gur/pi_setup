@@ -30,7 +30,7 @@ install-with-pi:
 
 # Sync repo-managed pi config, install missing packages, run `pi update`, and install external skills.
 install-full:
-    ./install.sh --update-packages
+    ./install.sh --update-packages --update-skills
 
 # Interactively add or replace an API-key provider entry in ~/.pi/agent/auth.json.
 add-provider:
