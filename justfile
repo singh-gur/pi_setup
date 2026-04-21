@@ -28,7 +28,7 @@ install-symlink:
 install-with-pi:
     ./install.sh --install-pi
 
-# Sync repo-managed pi config, install missing packages, update installed packages, and install external skills.
+# Sync repo-managed pi config, install missing packages, run `pi update`, and install external skills.
 install-full:
     ./install.sh --update-packages
 

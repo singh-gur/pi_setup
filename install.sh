@@ -48,7 +48,7 @@ Options:
   --symlink            Symlink files instead of copying them
   --install-pi         Install/update @mariozechner/pi-coding-agent via npm
   --config-only        Sync only repo-managed pi config files
-  --update-packages    Run pi update for already-installed packages in packages.json
+  --update-packages    Run pi update once after package sync to update installed pi packages
   --update-skills      Run npx skills update -g before installing missing configured skills
   -h, --help           Show this help
 
@@ -270,17 +270,17 @@ sync_pi_packages() {
     [[ -n "$package_name" ]] || continue
 
     if [[ -n "${installed_packages[$package_name]:-}" ]]; then
-      if [[ "$UPDATE_PACKAGES" -eq 1 ]]; then
-        log "pi update $package_name"
-        pi update "$package_name"
-      else
-        log "skipping installed package $package_name (use --update-packages to update)"
-      fi
+      log "skipping installed package $package_name"
     else
       log "pi install $package_name"
       pi install "$package_name"
     fi
   done <<< "$package_entries"
+
+  if [[ "$UPDATE_PACKAGES" -eq 1 ]]; then
+    log "pi update"
+    pi update
+  fi
 }
 
 sync_external_skills() {
