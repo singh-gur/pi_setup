@@ -31,6 +31,7 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
         ├── AGENTS.md
         ├── prompts/
         │   ├── gitship.md
+        │   ├── gityolo.md
         │   └── plan-progress.md
         └── settings.json
 ```
@@ -47,6 +48,7 @@ Add more global pi files under `pi/agent/`, for example:
 Current repo-managed prompts include:
 
 - `/gitship` via `pi/agent/prompts/gitship.md` for staging relevant work, creating a meaningful commit, and pushing while asking for confirmation when concerns are detected
+- `/gityolo` via `pi/agent/prompts/gityolo.md` for a faster git ship flow that still checks repo state but only stops for clearly risky or ambiguous situations
 - `/plan-progress` via `pi/agent/prompts/plan-progress.md` for reviewing a plan file against current repository progress with evidence-backed status reporting
 
 On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default.

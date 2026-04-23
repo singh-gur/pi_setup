@@ -16,7 +16,7 @@ Follow this workflow:
    - ambiguity about what should be staged
    - ambiguity about the push target, upstream branch, or remote
    - any verification failures you observed while checking the work
-4. If there are concerns, stop and ask me for confirmation before continuing. In that confirmation request, summarize:
+4. If there are concerns, stop and ask me for confirmation before continuing. Use the `ask_user` tool for any questions, confirmations, or clarifications you need from me. In that confirmation request, summarize:
    - what you found
    - what you plan to stage
    - the proposed commit message
@@ -39,3 +39,4 @@ Important guardrails:
 - Ask before pushing if the remote or target branch is unclear.
 - If there is nothing to commit, say so and stop.
 - Prefer a brief confirmation question over making a risky assumption.
+- Use the `ask_user` tool whenever you need user confirmation or clarification.
