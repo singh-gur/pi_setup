@@ -9,7 +9,7 @@
     "npm:pi-mono-clear": false,
     "npm:@zenobius/pi-worktrees": true,
     "npm:@codexstar/pi-listen": true,
-    "npm:@sherif-fanous/pi-catppuccin": true,
+    "npm:@sherif-fanous/pi-catppuccin": false,
     "npm:pi-lens": true
   }
 }

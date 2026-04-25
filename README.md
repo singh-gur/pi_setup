@@ -8,6 +8,7 @@ This repo is the source of truth for my global pi coding agent setup.
 - merges repo-managed `settings.json` into the target `settings.json` instead of replacing it wholesale
 - optionally installs or updates `@mariozechner/pi-coding-agent` when requested
 - installs missing enabled shared pi packages listed in `packages.json`
+- removes installed shared pi packages that are explicitly disabled in `packages.json`
 - optionally runs `pi update` after package sync when requested
 - installs missing external skills declared in `skills-install.json` via the `skills` CLI
 - optionally runs a global skills update before syncing configured external skills
@@ -123,6 +124,7 @@ That gives you:
 
 - latest repo-managed config
 - any missing enabled shared pi packages from `packages.json`
+- removal of any installed shared pi packages explicitly disabled in `packages.json`
 - any missing configured external skills from `skills-install.json`
 
 If you also want to run `pi update` after package sync:
@@ -161,7 +163,7 @@ During `./install.sh`, each configured missing skill is installed globally for t
 
 ## Shared pi packages
 
-Declare package sources in `packages.json` as a JSON object mapping package names to booleans. `true` means the package should be installed if missing; `false` disables it without removing it if already installed, e.g.
+Declare package sources in `packages.json` as a JSON object mapping package names to booleans. `true` means the package should be installed if missing; `false` means the package should be removed if it is currently installed, e.g.
 
 ```json
 {
@@ -238,5 +240,5 @@ The script preserves other auth entries, backs up any existing `auth.json`, and 
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
 - Existing conflicting files are backed up with a `.bak.TIMESTAMP` suffix
 - External skill install failures are reported, but the installer continues with other configured skills
-- Shared package installs are skipped when `pi` is not yet on `PATH`
+- Shared package installs and removals are skipped when `pi` is not yet on `PATH`
 - `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one

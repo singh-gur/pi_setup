@@ -252,10 +252,9 @@ sync_pi_packages() {
           ($pkg | gsub("^\\s+|\\s+$"; "")) as $trimmed_pkg
           | if ($trimmed_pkg | length) == 0 then
               error("package names must not be empty")
-            elif $enabled then
-              $trimmed_pkg
             else
-              empty
+              [$trimmed_pkg, ($enabled | tostring)]
+              | @tsv
             end
         end
     end
@@ -265,23 +264,45 @@ sync_pi_packages() {
   fi
 
   local package_name
+  local package_enabled
   declare -A installed_packages=()
+  declare -A enabled_packages=()
+  declare -A disabled_packages=()
   while IFS= read -r package_name; do
     [[ -n "$package_name" ]] || continue
     installed_packages["$package_name"]=1
   done < <(printf '%s\n' "$installed_packages_output" | sed -n 's/^  \([^[:space:]].*\)$/\1/p')
 
-  log "syncing shared pi packages from $PACKAGES_FILE"
-  while IFS= read -r package_name; do
+  while IFS=$'\t' read -r package_name package_enabled; do
     [[ -n "$package_name" ]] || continue
 
+    if [[ "$package_enabled" == "true" ]]; then
+      enabled_packages["$package_name"]=1
+    else
+      disabled_packages["$package_name"]=1
+    fi
+  done <<< "$package_entries"
+
+  log "syncing shared pi packages from $PACKAGES_FILE"
+
+  for package_name in "${!disabled_packages[@]}"; do
+    if [[ -n "${installed_packages[$package_name]:-}" ]]; then
+      log "pi remove $package_name"
+      pi remove "$package_name"
+      unset 'installed_packages[$package_name]'
+    else
+      log "skipping absent disabled package $package_name"
+    fi
+  done
+
+  for package_name in "${!enabled_packages[@]}"; do
     if [[ -n "${installed_packages[$package_name]:-}" ]]; then
       log "skipping installed package $package_name"
     else
       log "pi install $package_name"
       pi install "$package_name"
     fi
-  done <<< "$package_entries"
+  done
 
   if [[ "$UPDATE_PACKAGES" -eq 1 ]]; then
     log "pi update"
