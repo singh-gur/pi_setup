@@ -6,7 +6,7 @@
     "npm:pi-ask-user": true,
     "npm:pi-subagents": true,
     "npm:@ifi/pi-plan": true,
-    "npm:pi-mono-clear": true,
+    "npm:pi-mono-clear": false,
     "npm:@zenobius/pi-worktrees": true,
     "npm:@codexstar/pi-listen": true,
     "npm:@sherif-fanous/pi-catppuccin": true,
