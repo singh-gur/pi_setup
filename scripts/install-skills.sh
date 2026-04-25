@@ -187,8 +187,8 @@ main() {
       continue
     fi
 
-    log "npx skills add $repo_url --skill $skill_name -g --agent pi -y"
-    if npx --yes skills add "$repo_url" --skill "$skill_name" -g --agent pi -y </dev/null; then
+    log "npx skills add $repo_url --skill $skill_name -g -y"
+    if npx --yes skills add "$repo_url" --skill "$skill_name" -g -y </dev/null; then
       installed=$((installed + 1))
       installed_skills["$skill_name"]=1
     else

@@ -7,7 +7,7 @@ This repo is the source of truth for my global pi coding agent setup.
 - syncs repo-managed global pi config from `pi/agent/` into `~/.pi/agent` by default
 - merges repo-managed `settings.json` into the target `settings.json` instead of replacing it wholesale
 - optionally installs or updates `@mariozechner/pi-coding-agent` when requested
-- installs missing shared pi packages listed in `packages.json`
+- installs missing enabled shared pi packages listed in `packages.json`
 - optionally runs `pi update` after package sync when requested
 - installs missing external skills declared in `skills-install.json` via the `skills` CLI
 - optionally runs a global skills update before syncing configured external skills
@@ -122,7 +122,7 @@ git pull
 That gives you:
 
 - latest repo-managed config
-- any missing shared pi packages from `packages.json`
+- any missing enabled shared pi packages from `packages.json`
 - any missing configured external skills from `skills-install.json`
 
 If you also want to run `pi update` after package sync:
@@ -161,16 +161,16 @@ During `./install.sh`, each configured missing skill is installed globally for t
 
 ## Shared pi packages
 
-Declare package sources in `packages.json` for cleaner parsing and JSON tooling support, e.g.
+Declare package sources in `packages.json` as a JSON object mapping package names to booleans. `true` means the package should be installed if missing; `false` disables it without removing it if already installed, e.g.
 
 ```json
 {
-  "packages": [
-    "npm:@foo/pi-tools",
-    "npm:@bar/pi-theme@1.2.3",
-    "git:github.com/user/pi-package",
-    "https://github.com/user/another-pi-package"
-  ]
+  "packages": {
+    "npm:@foo/pi-tools": true,
+    "npm:@bar/pi-theme@1.2.3": false,
+    "git:github.com/user/pi-package": true,
+    "https://github.com/user/another-pi-package": true
+  }
 }
 ```
 
@@ -178,18 +178,19 @@ Current shared package config:
 
 ```json
 {
-  "packages": [
-    "npm:@ifi/oh-pi-themes",
-    "npm:@eliemessiecode/pi-code-theme",
-    "npm:@haispeed/pi-deck",
-    "npm:pi-ask-user",
-    "npm:pi-subagents",
-    "npm:@ifi/pi-plan",
-    "npm:pi-mono-clear",
-    "npm:@zenobius/pi-worktrees",
-    "npm:@codexstar/pi-listen",
-    "npm:@sherif-fanous/pi-catppuccin"
-  ]
+  "packages": {
+    "npm:@ifi/oh-pi-themes": true,
+    "npm:@eliemessiecode/pi-code-theme": true,
+    "npm:@haispeed/pi-deck": true,
+    "npm:pi-ask-user": true,
+    "npm:pi-subagents": true,
+    "npm:@ifi/pi-plan": true,
+    "npm:pi-mono-clear": true,
+    "npm:@zenobius/pi-worktrees": true,
+    "npm:@codexstar/pi-listen": true,
+    "npm:@sherif-fanous/pi-catppuccin": true,
+    "npm:pi-lens": true
+  }
 }
 ```
 
@@ -229,6 +230,7 @@ The script preserves other auth entries, backs up any existing `auth.json`, and 
 
 - `skills-install.json` is optional; an empty object means no external skills are installed
 - `packages.json` is optional; missing or invalid package config is skipped with a warning
+- `packages.json` must contain a `packages` object of `"package-name": true|false` entries
 - `jq` is required to parse `packages.json` and `skills-install.json`
 - `npx` is required to run the `skills` CLI installer
 - `python3` is required for `settings.json` merges and the auth helper

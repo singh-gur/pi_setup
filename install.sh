@@ -237,19 +237,25 @@ sync_pi_packages() {
   if ! package_entries="$(jq -r '
     if type != "object" then
       error("packages.json must contain a JSON object")
-    elif (.packages | type) != "array" then
-      error("packages.json must contain a packages array")
+    elif (.packages | type) != "object" then
+      error("packages.json must contain a packages object")
     else
-      .packages[]?
-      | if type != "string" then
-          error("packages entries must be strings")
+      .packages
+      | to_entries[]?
+      | .key as $pkg
+      | .value as $enabled
+      | if ($pkg | type) != "string" then
+          error("package names must be strings")
+        elif ($enabled | type) != "boolean" then
+          error("package flags must be booleans")
         else
-          . as $pkg
-          | ($pkg | gsub("^\\s+|\\s+$"; "")) as $trimmed_pkg
+          ($pkg | gsub("^\\s+|\\s+$"; "")) as $trimmed_pkg
           | if ($trimmed_pkg | length) == 0 then
-              error("packages entries must not be empty")
-            else
+              error("package names must not be empty")
+            elif $enabled then
               $trimmed_pkg
+            else
+              empty
             end
         end
     end

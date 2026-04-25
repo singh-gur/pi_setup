@@ -3,6 +3,6 @@
   "quietStartup": true,
   "collapseChangelog": true,
   "voice": {
-    "toggleShortcut": "ctrl+shift+l"
+    "toggleShortcut": "ctrl+shift+o"
   }
 }

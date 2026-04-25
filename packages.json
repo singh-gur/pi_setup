@@ -1,15 +1,15 @@
 {
-  "packages": [
-    "npm:@ifi/oh-pi-themes",
-    "npm:@eliemessiecode/pi-code-theme",
-    "npm:@haispeed/pi-deck",
-    "npm:pi-ask-user",
-    "npm:pi-subagents",
-    "npm:@ifi/pi-plan",
-    "npm:pi-mono-clear",
-    "npm:@zenobius/pi-worktrees",
-    "npm:@codexstar/pi-listen",
-    "npm:@sherif-fanous/pi-catppuccin",
-    "npm:pi-lens"
-  ]
+  "packages": {
+    "npm:@ifi/oh-pi-themes": true,
+    "npm:@eliemessiecode/pi-code-theme": true,
+    "npm:@haispeed/pi-deck": true,
+    "npm:pi-ask-user": true,
+    "npm:pi-subagents": true,
+    "npm:@ifi/pi-plan": true,
+    "npm:pi-mono-clear": true,
+    "npm:@zenobius/pi-worktrees": true,
+    "npm:@codexstar/pi-listen": true,
+    "npm:@sherif-fanous/pi-catppuccin": true,
+    "npm:pi-lens": true
+  }
 }
