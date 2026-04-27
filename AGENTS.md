@@ -12,6 +12,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - `just install-symlink` — sync config using symlinks instead of copies
 - `just install-with-pi` — also install or update pi itself via npm
 - `just install-full` — also run `pi update` after syncing shared pi packages
+- `just install-clean` — back up and replace repo-managed config targets, reinstall configured pi packages, and sync external skills
 - `just add-provider` — interactively add or replace an API-key provider entry in local `auth.json`
 - `just check` — validate scripts and JSON config
 

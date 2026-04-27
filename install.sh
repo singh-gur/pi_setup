@@ -11,6 +11,7 @@ INSTALL_PI=0
 CONFIG_ONLY=0
 UPDATE_PACKAGES=0
 UPDATE_SKILLS=0
+CLEAN=0
 SYNC_MODE="copy"
 BACKUP_SUFFIX="$(date +%Y%m%d-%H%M%S)"
 PROTECTED_TARGETS=(
@@ -48,6 +49,7 @@ Options:
   --symlink            Symlink files instead of copying them
   --install-pi         Install/update @mariozechner/pi-coding-agent via npm
   --config-only        Sync only repo-managed pi config files
+  --clean              Remove repo-managed config targets before syncing and reinstall configured pi packages
   --update-packages    Run pi update once after package sync to update installed pi packages
   --update-skills      Run npx skills update -g before installing missing configured skills
   -h, --help           Show this help
@@ -57,6 +59,7 @@ Examples:
   ./install.sh --install-pi
   ./install.sh --symlink
   ./install.sh --config-only
+  ./install.sh --clean
   ./install.sh --update-packages
   ./install.sh --update-skills
   ./install.sh --pi-dir ~/.config/pi/agent
@@ -107,6 +110,22 @@ is_merged_json_target() {
     fi
   done
   return 1
+}
+
+remove_target_entry() {
+  local target="$1"
+  local relpath="$2"
+
+  if is_protected_target "$relpath"; then
+    log "skipping protected target $target"
+    return
+  fi
+
+  if [[ -e "$target" || -L "$target" ]]; then
+    backup_existing "$target"
+  else
+    log "clean target absent $target"
+  fi
 }
 
 merge_json_file() {
@@ -203,6 +222,14 @@ sync_pi_config() {
 
   mkdir -p "$TARGET_PI_DIR"
 
+  if [[ "$CLEAN" -eq 1 ]]; then
+    log "cleaning repo-managed pi config targets"
+    while IFS= read -r relpath; do
+      [[ -n "$relpath" ]] || continue
+      remove_target_entry "$TARGET_PI_DIR/$relpath" "$relpath"
+    done < <(cd "$SOURCE_PI_DIR" && find . -mindepth 1 -maxdepth 1 | sed 's#^./##' | sort)
+  fi
+
   while IFS= read -r relpath; do
     [[ -n "$relpath" ]] || continue
     local source="$SOURCE_PI_DIR/$relpath"
@@ -295,6 +322,18 @@ sync_pi_packages() {
     fi
   done
 
+  if [[ "$CLEAN" -eq 1 ]]; then
+    for package_name in "${!enabled_packages[@]}"; do
+      if [[ -n "${installed_packages[$package_name]:-}" ]]; then
+        log "pi remove $package_name"
+        pi remove "$package_name"
+        unset 'installed_packages[$package_name]'
+      else
+        log "skipping absent enabled package $package_name"
+      fi
+    done
+  fi
+
   for package_name in "${!enabled_packages[@]}"; do
     if [[ -n "${installed_packages[$package_name]:-}" ]]; then
       log "skipping installed package $package_name"
@@ -338,6 +377,10 @@ parse_args() {
         CONFIG_ONLY=1
         shift
         ;;
+      --clean)
+        CLEAN=1
+        shift
+        ;;
       --update-packages)
         UPDATE_PACKAGES=1
         shift
@@ -365,6 +408,9 @@ main() {
   log "source pi dir: $SOURCE_PI_DIR"
   log "target pi dir: $TARGET_PI_DIR"
   log "mode: $SYNC_MODE"
+  if [[ "$CLEAN" -eq 1 ]]; then
+    log "clean: enabled"
+  fi
 
   install_pi
   sync_pi_config

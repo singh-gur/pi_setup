@@ -9,6 +9,7 @@ This repo is the source of truth for my global pi coding agent setup.
 - optionally installs or updates `@mariozechner/pi-coding-agent` when requested
 - installs missing enabled shared pi packages listed in `packages.json`
 - removes installed shared pi packages that are explicitly disabled in `packages.json`
+- can cleanly reinstall repo-managed config targets and configured pi packages when requested
 - optionally runs `pi update` after package sync when requested
 - installs missing external skills declared in `skills-install.json` via the `skills` CLI
 - optionally runs a global skills update before syncing configured external skills
@@ -82,6 +83,7 @@ just install-skills   # install only external skills from skills-install.json
 just install-symlink  # sync config using symlinks instead of copies
 just install-with-pi  # also install/update pi itself via npm
 just install-full     # also run `pi update` after package sync
+just install-clean    # back up/reinstall repo-managed config and configured packages
 just add-provider     # run the auth helper
 just check            # validate scripts and JSON config
 just show-skills      # print skills-install.json
@@ -94,6 +96,7 @@ Options:
 ./install.sh --symlink            # symlink instead of copy
 ./install.sh --install-pi         # also install/update pi via npm
 ./install.sh --config-only        # sync only repo-managed config files
+./install.sh --clean              # back up/reinstall repo-managed config and configured packages
 ./install.sh --update-packages    # run `pi update` after package sync
 ./install.sh --update-skills      # run `npx skills update -g` before syncing configured skills
 ./install.sh --pi-dir ~/.config/pi/agent
@@ -131,6 +134,12 @@ If you also want to run `pi update` after package sync:
 
 ```bash
 ./install.sh --update-packages
+```
+
+If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json` or `sessions/`:
+
+```bash
+just install-clean
 ```
 
 If you also want to install or update pi itself:
@@ -239,6 +248,7 @@ The script preserves other auth entries, backs up any existing `auth.json`, and 
 - Default pi global config dir: `~/.pi/agent`
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
 - Existing conflicting files are backed up with a `.bak.TIMESTAMP` suffix
+- `--clean` backs up existing repo-managed config targets with a `.bak.TIMESTAMP` suffix before reinstalling them, skips `auth.json` and `sessions/`, removes configured pi packages, and installs enabled packages again
 - External skill install failures are reported, but the installer continues with other configured skills
 - Shared package installs and removals are skipped when `pi` is not yet on `PATH`
 - `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one

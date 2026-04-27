@@ -32,6 +32,10 @@ install-with-pi:
 install-full:
     ./install.sh --update-packages --update-skills
 
+# Back up and replace repo-managed config targets, reinstall configured packages, and sync external skills.
+install-clean:
+    ./install.sh --clean
+
 # Interactively add or replace an API-key provider entry in ~/.pi/agent/auth.json.
 add-provider:
     ./scripts/add-provider-api-key.sh
