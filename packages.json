@@ -8,7 +8,7 @@
     "npm:@ifi/pi-plan": true,
     "npm:pi-mono-clear": false,
     "npm:@zenobius/pi-worktrees": true,
-    "npm:@codexstar/pi-listen": true,
+    "npm:@codexstar/pi-listen": false,
     "npm:@sherif-fanous/pi-catppuccin": false,
     "npm:pi-lens": true
   }
