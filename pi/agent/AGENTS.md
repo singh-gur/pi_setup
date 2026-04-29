@@ -48,6 +48,12 @@ These rules apply to all pi agents and sessions.
 - Implement appropriate error handling and logging
 - Preserve existing style unless asked to refactor
 
+## Bug Fixes
+
+- When working on bug fixes, focus only on fixing the reported bug and keep changes limited to the smallest safe scope
+- Avoid broad rewrites, unrelated refactors, or opportunistic cleanup while fixing bugs
+- If a larger rewrite or wider change is absolutely necessary to fix the bug, explain why, outline the intended changes, and ask the user for approval before proceeding
+
 ## Repo-Scoped AGENTS Sync
 
 - If working inside another repository that has its own repo-scoped `AGENTS.md`, treat that file as part of the maintained codebase and keep it aligned with meaningful workflow, policy, command, tooling, or expectation changes made during the session
