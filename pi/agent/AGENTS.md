@@ -39,6 +39,14 @@ These rules apply to all pi agents and sessions.
 - Give concise progress updates during longer tasks
 - Skip heavyweight planning for simple, straightforward tasks
 
+## Dependency Management
+
+- Use the project's package manager to add, update, or remove dependencies instead of editing manifest files directly
+- For Python projects, prefer commands like `uv add`, `uv remove`, or the project’s configured dependency workflow rather than manually editing `pyproject.toml`
+- For Node.js projects, prefer commands like `pnpm add`, `pnpm remove`, `npm install`, or `yarn add` according to the project’s existing lockfile and tooling rather than manually editing `package.json`
+- Preserve and update lockfiles through the package manager so dependency versions stay resolved and reproducible
+- Only edit dependency manifest files directly when the package manager cannot express the needed change, and explain why
+
 ## Code Quality
 
 - Prefer established patterns and libraries over custom solutions
