@@ -1,40 +1,24 @@
 set shell := ["bash", "-cu"]
 
-# Show available helper recipes and their descriptions.
+# Show available recipes.
 default:
     @just --list
 
-# Show available helper recipes and their descriptions.
-help:
-    @just --list
-
-# Sync repo-managed pi config, install missing shared pi packages, and install external skills.
-install:
-    ./install.sh
-
-# Sync only the repo-managed files under pi/agent.
-install-config:
-    ./install.sh --config-only
-
-# Install only the external skills listed in skills-install.json.
-install-skills:
-    ./scripts/install-skills.sh
-
-# Sync repo-managed pi config using symlinks instead of copying files.
-install-symlink:
-    ./install.sh --symlink
-
-# Install or update pi itself, then sync repo-managed config, packages, and skills.
-install-with-pi:
-    ./install.sh --install-pi
-
-# Sync repo-managed pi config, install missing packages, run `pi update`, and install external skills.
-install-full:
-    ./install.sh --update-packages --update-skills
-
-# Back up and replace repo-managed config targets, reinstall configured packages, and sync external skills.
-install-clean:
-    ./install.sh --clean
+# Sync repo-managed pi config, packages, and skills.
+# Modes: (none), config, skills, symlink, with-pi, full, clean
+install mode="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "{{ mode }}" in
+      "") ./install.sh ;;
+      config) ./install.sh --config-only ;;
+      skills) ./scripts/install-skills.sh ;;
+      symlink) ./install.sh --symlink ;;
+      with-pi) ./install.sh --install-pi ;;
+      full) ./install.sh --install-pi --update-packages --update-skills ;;
+      clean) ./install.sh --clean ;;
+      *) echo "Unknown install mode: {{ mode }}"; exit 1 ;;
+    esac
 
 # Interactively add or replace an API-key provider entry in ~/.pi/agent/auth.json.
 add-provider:
@@ -47,11 +31,3 @@ check:
     bash -n scripts/install-skills.sh
     jq empty packages.json
     jq empty skills-install.json
-
-# Print the current external skills config.
-show-skills:
-    jq . skills-install.json
-
-# Print the current shared pi packages list.
-show-packages:
-    jq -r '.packages[]' packages.json
