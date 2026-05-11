@@ -6,7 +6,7 @@ This repo is the source of truth for my global pi coding agent setup.
 
 - syncs repo-managed global pi config from `pi/agent/` into `~/.pi/agent` by default
 - merges repo-managed `settings.json` into the target `settings.json` instead of replacing it wholesale
-- optionally installs or updates `@mariozechner/pi-coding-agent` when requested
+- optionally installs or updates pi using the official `https://pi.dev/install.sh` installer when requested
 - installs missing enabled shared pi packages listed in `packages.json`
 - removes installed shared pi packages that are explicitly disabled in `packages.json`
 - can cleanly reinstall repo-managed config targets and configured pi packages when requested
@@ -81,7 +81,7 @@ just install          # sync config, install missing packages, install missing s
 just install-config   # sync only repo-managed files under pi/agent
 just install-skills   # install only external skills from skills-install.json
 just install-symlink  # sync config using symlinks instead of copies
-just install-with-pi  # also install/update pi itself via npm
+just install-with-pi  # also install/update pi itself via the official installer
 just install-full     # also run `pi update` after package sync
 just install-clean    # back up/reinstall repo-managed config and configured packages
 just add-provider     # run the auth helper
@@ -94,7 +94,7 @@ Options:
 
 ```bash
 ./install.sh --symlink            # symlink instead of copy
-./install.sh --install-pi         # also install/update pi via npm
+./install.sh --install-pi         # also install/update pi via the official installer
 ./install.sh --config-only        # sync only repo-managed config files
 ./install.sh --clean              # back up/reinstall repo-managed config and configured packages
 ./install.sh --update-packages    # run `pi update` after package sync
