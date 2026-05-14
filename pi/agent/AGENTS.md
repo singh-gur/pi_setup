@@ -39,6 +39,11 @@ These rules apply to all pi agents and sessions.
 - Give concise progress updates during longer tasks
 - Skip heavyweight planning for simple, straightforward tasks
 
+## Project Automation
+
+- Prefer adding a `justfile` to repositories or projects where it can provide useful, repeatable workflows
+- When creating a `justfile`, include usage details for tasks and add a default task that lists available `just` tasks
+
 ## Dependency Management
 
 - Use the project's package manager to add, update, or remove dependencies instead of editing manifest files directly
