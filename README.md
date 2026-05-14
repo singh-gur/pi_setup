@@ -32,6 +32,7 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
     └── agent/
         ├── AGENTS.md
         ├── prompts/
+        │   ├── clone-prompt.md
         │   ├── gitship.md
         │   ├── gityolo.md
         │   └── plan-progress.md
@@ -49,6 +50,7 @@ Add more global pi files under `pi/agent/`, for example:
 
 Current repo-managed prompts include:
 
+- `/clone-prompt` via `pi/agent/prompts/clone-prompt.md` for studying the current repo and generating reusable prompts for building a similar project
 - `/gitship` via `pi/agent/prompts/gitship.md` for staging relevant work, creating a meaningful commit, and pushing while asking for confirmation when concerns are detected
 - `/gityolo` via `pi/agent/prompts/gityolo.md` for a faster git ship flow that still checks repo state but only stops for clearly risky or ambiguous situations
 - `/plan-progress` via `pi/agent/prompts/plan-progress.md` for reviewing a plan file against current repository progress with evidence-backed status reporting
