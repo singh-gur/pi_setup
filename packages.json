@@ -10,6 +10,7 @@
     "npm:@zenobius/pi-worktrees": true,
     "npm:@codexstar/pi-listen": false,
     "npm:@sherif-fanous/pi-catppuccin": false,
-    "npm:pi-lens": true
+    "npm:pi-lens": false,
+    "npm:@juicesharp/rpiv-todo": true
   }
 }
