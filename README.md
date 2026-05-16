@@ -82,16 +82,14 @@ Or use the helper `justfile`:
 ```bash
 just                  # show available recipes
 just install          # sync config, install missing packages, install missing skills
-just install-config   # sync only repo-managed files under pi/agent
-just install-skills   # install only external skills from skills-install.json
-just install-symlink  # sync config using symlinks instead of copies
-just install-with-pi  # also install/update pi itself via the official installer
-just install-full     # also run `pi update` after package sync
-just install-clean    # back up/reinstall repo-managed config and configured packages
+just install config   # sync only repo-managed files under pi/agent
+just install skills   # install only external skills from skills-install.json
+just install symlink  # sync config using symlinks instead of copies
+just install update   # run `pi update` and update external skills while syncing
+just install full     # install/update pi, then update packages and external skills
+just install clean    # back up/reinstall repo-managed config and configured packages
 just add-provider     # run the auth helper
 just check            # validate scripts and JSON config
-just show-skills      # print skills-install.json
-just show-packages    # print packages.json
 ```
 
 Options:
@@ -143,7 +141,7 @@ If you also want to run `pi update` after package sync:
 If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json` or `sessions/`:
 
 ```bash
-just install-clean
+just install clean
 ```
 
 If you also want to install or update pi itself:
@@ -172,7 +170,7 @@ Current external skills config:
 }
 ```
 
-During `./install.sh`, each configured missing skill is installed globally for the `pi` agent via the `skills` CLI through `./scripts/install-skills.sh --optional`. If you only want to refresh external skills, run `just install-skills` or `./scripts/install-skills.sh`. Add `--update-skills` if you want to run `npx skills update -g` first. If `jq` or `npx` is missing, external skill installation is skipped with a warning.
+During `./install.sh`, each configured missing skill is installed globally for the `pi` agent via the `skills` CLI through `./scripts/install-skills.sh --optional`. If you only want to refresh external skills, run `just install skills` or `./scripts/install-skills.sh`. Add `--update-skills` if you want to run `npx skills update -g` first. If `jq` or `npx` is missing, external skill installation is skipped with a warning.
 
 ## Shared pi packages
 

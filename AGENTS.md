@@ -11,8 +11,8 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
   - `config` — sync only repo-managed files under `pi/agent`
   - `skills` — install only external skills from `skills-install.json`
   - `symlink` — sync config using symlinks instead of copies
-  - `with-pi` — also install or update pi itself via the official `https://pi.dev/install.sh` installer
-  - `full` — install or update pi itself, then run `pi update` after syncing shared pi packages and installing skills
+  - `update` — sync config, run `pi update`, and update external skills
+  - `full` — install or update pi itself, then run package and external skill updates
   - `clean` — back up and replace repo-managed config targets, reinstall configured packages, and sync external skills
 - `just add-provider` — interactively add or replace an API-key provider entry in local `auth.json`
 - `just check` — validate scripts and JSON config

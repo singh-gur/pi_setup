@@ -5,7 +5,7 @@ default:
     @just --list
 
 # Sync repo-managed pi config, packages, and skills.
-# Modes: (none), config, skills, symlink, with-pi, full, clean
+# Modes: (none), config, skills, symlink, full, clean, update
 install mode="":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -14,7 +14,7 @@ install mode="":
       config) ./install.sh --config-only ;;
       skills) ./scripts/install-skills.sh ;;
       symlink) ./install.sh --symlink ;;
-      with-pi) ./install.sh --install-pi ;;
+      update) ./install.sh --update-packages --update-skills ;;
       full) ./install.sh --install-pi --update-packages --update-skills ;;
       clean) ./install.sh --clean ;;
       *) echo "Unknown install mode: {{ mode }}"; exit 1 ;;
