@@ -11,6 +11,6 @@
     "npm:@codexstar/pi-listen": false,
     "npm:@sherif-fanous/pi-catppuccin": false,
     "npm:pi-lens": false,
-    "npm:@juicesharp/rpiv-todo": true
+    "npm:@juicesharp/rpiv-todo": false
   }
 }
