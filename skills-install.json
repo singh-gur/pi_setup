@@ -1,8 +1,3 @@
 {
-  "https://github.com/juliusbrussee/caveman": ["caveman"],
-  "https://github.com/singh-gur/agent_skills": ["super-plan", "simple-plan"],
-  "https://github.com/vercel-labs/agent-skills": [
-    "vercel-react-best-practices",
-    "web-design-guidelines"
-  ]
+  "https://github.com/singh-gur/agent_skills": ["super-plan", "simple-plan"]
 }
