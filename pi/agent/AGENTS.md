@@ -52,6 +52,12 @@ These rules apply to all pi agents and sessions.
 - Preserve and update lockfiles through the package manager so dependency versions stay resolved and reproducible
 - Only edit dependency manifest files directly when the package manager cannot express the needed change, and explain why
 
+## Documentation & Usage Accuracy
+
+- When building with or advising on specs, interfaces, CLI tools, APIs, frameworks, or libraries, verify expected usage against available documentation, schemas, source definitions, or built-in help text before making assumptions
+- Prefer project-local docs and installed version help first, then official upstream documentation when local sources are insufficient
+- When exact behavior is uncertain or docs are unavailable, state the uncertainty, ask the user for clarification or source material when needed, and avoid presenting guesses as facts
+
 ## Code Quality
 
 - Prefer established patterns and libraries over custom solutions
