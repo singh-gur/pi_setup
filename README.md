@@ -11,7 +11,8 @@ This repo is the source of truth for my global pi coding agent setup.
 - removes installed shared pi packages that are explicitly disabled in `packages.json`
 - can cleanly reinstall repo-managed config targets and configured pi packages when requested
 - optionally runs `pi update` after package sync when requested
-- installs missing external skills declared in `skills-install.json` via the `skills` CLI
+- installs missing enabled external skills declared in `skills-install.json` via the `skills` CLI
+- removes installed external skills that are explicitly disabled in `skills-install.json`
 - optionally runs a global skills update before syncing configured external skills
 
 It intentionally does **not** touch local machine data like `auth.json` or the `sessions/` folder in the target pi directory.
@@ -110,10 +111,11 @@ Add or replace an API-key provider entry in `~/.pi/agent/auth.json` interactivel
 ./scripts/add-provider-api-key.sh
 ```
 
-If `skills-install.json` exists, the installer also attempts to install each missing configured external skill by calling `./scripts/install-skills.sh --optional`:
+If `skills-install.json` exists, the installer also attempts to install each missing enabled external skill and remove each installed disabled external skill by calling `./scripts/install-skills.sh --optional`:
 
 ```bash
-npx skills add <repo> --skill <skill> -g --agent pi -y
+npx skills add <repo> --skill <skill> -g -y
+npx skills remove <skill> -g -y
 ```
 
 ## Keeping machines in sync
@@ -130,7 +132,8 @@ That gives you:
 - latest repo-managed config
 - any missing enabled shared pi packages from `packages.json`
 - removal of any installed shared pi packages explicitly disabled in `packages.json`
-- any missing configured external skills from `skills-install.json`
+- any missing enabled external skills from `skills-install.json`
+- removal of any installed external skills explicitly disabled in `skills-install.json`
 
 If you also want to run `pi update` after package sync:
 
@@ -152,12 +155,17 @@ If you also want to install or update pi itself:
 
 ## External skills
 
-Declare external skills in `skills-install.json` as a JSON object mapping repository URLs to skill name arrays:
+Declare external skills in `skills-install.json` as a JSON object mapping repository URLs to skill-name booleans. `true` means the skill should be installed if missing; `false` means the skill should be removed if it is currently installed.
 
 ```json
 {
-  "https://github.com/anthropics/skills": ["frontend-design"],
-  "https://github.com/vercel-labs/skills": ["find-skills"]
+  "https://github.com/anthropics/skills": {
+    "frontend-design": true,
+    "old-skill": false
+  },
+  "https://github.com/vercel-labs/skills": {
+    "find-skills": true
+  }
 }
 ```
 
@@ -165,8 +173,11 @@ Current external skills config:
 
 ```json
 {
-  "https://github.com/juliusbrussee/caveman": ["caveman"],
-  "https://github.com/singh-gur/agent_skills": ["super-plan"]
+  "https://github.com/singh-gur/agent_skills": {
+    "super-plan": true,
+    "simple-plan": true,
+    "caveman": true
+  }
 }
 ```
 
@@ -241,9 +252,10 @@ The script preserves other auth entries, backs up any existing `auth.json`, and 
 
 ## Notes
 
-- `skills-install.json` is optional; an empty object means no external skills are installed
+- `skills-install.json` is optional; an empty object means no external skills are installed or removed
 - `packages.json` is optional; missing or invalid package config is skipped with a warning
 - `packages.json` must contain a `packages` object of `"package-name": true|false` entries
+- `skills-install.json` should map repository URLs to `"skill-name": true|false` entries; legacy skill name arrays are still treated as enabled skills
 - `jq` is required to parse `packages.json` and `skills-install.json`
 - `npx` is required to run the `skills` CLI installer
 - `python3` is required for `settings.json` merges and the auth helper
@@ -251,6 +263,6 @@ The script preserves other auth entries, backs up any existing `auth.json`, and 
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
 - Existing conflicting files are backed up with a `.bak.TIMESTAMP` suffix
 - `--clean` backs up existing repo-managed config targets with a `.bak.TIMESTAMP` suffix before reinstalling them, skips `auth.json` and `sessions/`, removes configured pi packages, and installs enabled packages again
-- External skill install failures are reported, but the installer continues with other configured skills
+- External skill install and removal failures are reported, but the installer continues with other configured skills
 - Shared package installs and removals are skipped when `pi` is not yet on `PATH`
 - `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one

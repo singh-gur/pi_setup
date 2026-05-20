@@ -22,7 +22,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - `install.sh` — main installer
 - `justfile` — helper recipes
 - `packages.json` — shared pi packages to sync, using boolean enable flags per package name (`true` installs if missing, `false` removes if installed)
-- `skills-install.json` — external skills to install
+- `skills-install.json` — external skills to sync, using boolean enable flags per skill name (`true` installs if missing, `false` removes if installed)
 - `scripts/install-skills.sh` — external skills sync helper
 - `scripts/add-provider-api-key.sh` — local auth helper
 - `scripts/merge-json.py` — JSON merge helper for managed config

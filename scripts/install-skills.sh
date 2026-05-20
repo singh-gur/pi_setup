@@ -112,26 +112,40 @@ main() {
 
   local skill_entries
   if ! skill_entries="$(jq -r '
+    def trim: gsub("^\\s+|\\s+$"; "");
+    def validate_skill($url; $skill):
+      if ($skill | type) != "string" then
+        error("Invalid skill name for \($url)")
+      else
+        ($skill | trim) as $trimmed_skill
+        | if ($trimmed_skill | length) == 0 then
+            error("Invalid skill name for \($url)")
+          else
+            $trimmed_skill
+          end
+      end;
     if type != "object" then
       error("skills-install.json must contain a JSON object")
     else
       to_entries[]?
       | .key as $url
-      | if (.value | type) != "array" then
-          error("Expected an array of skills for \($url)")
-        else
+      | if (.value | type) == "array" then
           .value[]?
-          | if type != "string" then
-              error("Invalid skill name for \($url)")
+          | validate_skill($url; .) as $skill
+          | "\($url)\t\($skill)\ttrue"
+        elif (.value | type) == "object" then
+          .value
+          | to_entries[]?
+          | .key as $skill
+          | .value as $enabled
+          | if ($enabled | type) != "boolean" then
+              error("Skill flags for \($url) must be booleans")
             else
-              . as $skill
-              | ($skill | gsub("^\\s+|\\s+$"; "")) as $trimmed_skill
-              | if ($trimmed_skill | length) == 0 then
-                  error("Invalid skill name for \($url)")
-                else
-                  "\($url)\t\($trimmed_skill)"
-                end
+              validate_skill($url; $skill) as $trimmed_skill
+              | "\($url)\t\($trimmed_skill)\t\($enabled)"
             end
+        else
+          error("Expected an array of skills or object of skill booleans for \($url)")
         end
     end
   ' "$SKILLS_INSTALL_FILE")"; then
@@ -173,13 +187,47 @@ main() {
   local attempted=0
   local installed=0
   local skipped=0
+  local removed=0
+  local remove_skipped=0
   local failed=0
+  local remove_failed=0
   local repo_url
+  local skill_enabled
+  declare -A enabled_skills=()
+  declare -A disabled_skills=()
+  declare -A skill_repos=()
 
-  log "syncing external skills from $SKILLS_INSTALL_FILE"
-  while IFS=$'\t' read -r repo_url skill_name; do
+  while IFS=$'\t' read -r repo_url skill_name skill_enabled; do
     [[ -n "$repo_url" ]] || continue
 
+    if [[ "$skill_enabled" == "true" ]]; then
+      enabled_skills["$skill_name"]=1
+      skill_repos["$skill_name"]="$repo_url"
+    else
+      disabled_skills["$skill_name"]=1
+    fi
+  done <<< "$skill_entries"
+
+  log "syncing external skills from $SKILLS_INSTALL_FILE"
+
+  for skill_name in "${!disabled_skills[@]}"; do
+    if [[ -n "${installed_skills[$skill_name]:-}" ]]; then
+      log "npx skills remove $skill_name -g -y"
+      if npx --yes skills remove "$skill_name" -g -y </dev/null; then
+        removed=$((removed + 1))
+        unset 'installed_skills[$skill_name]'
+      else
+        remove_failed=$((remove_failed + 1))
+        warn "failed to remove disabled external skill '$skill_name', continuing"
+      fi
+    else
+      remove_skipped=$((remove_skipped + 1))
+      log "skipping absent disabled external skill $skill_name"
+    fi
+  done
+
+  for skill_name in "${!enabled_skills[@]}"; do
+    repo_url="${skill_repos[$skill_name]}"
     attempted=$((attempted + 1))
     if [[ -n "${installed_skills[$skill_name]:-}" ]]; then
       skipped=$((skipped + 1))
@@ -195,14 +243,23 @@ main() {
       failed=$((failed + 1))
       warn "failed to install external skill '$skill_name' from $repo_url, continuing"
     fi
-  done <<< "$skill_entries"
+  done
 
   log "external skills installed: $installed/$attempted"
   if [[ "$skipped" -gt 0 ]]; then
     log "external skills skipped (already installed): $skipped"
   fi
+  if [[ "$removed" -gt 0 ]]; then
+    log "external skills removed (disabled): $removed"
+  fi
+  if [[ "$remove_skipped" -gt 0 ]]; then
+    log "external skills skipped (disabled and absent): $remove_skipped"
+  fi
   if [[ "$failed" -gt 0 ]]; then
     warn "external skill installs failed: $failed"
+  fi
+  if [[ "$remove_failed" -gt 0 ]]; then
+    warn "external skill removals failed: $remove_failed"
   fi
 }
 
