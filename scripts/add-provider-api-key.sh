@@ -12,6 +12,7 @@ SUPPORTED_PROVIDERS=(
   "mistral"
   "groq"
   "cerebras"
+  "cursor"
   "xai"
   "openrouter"
   "vercel-ai-gateway"

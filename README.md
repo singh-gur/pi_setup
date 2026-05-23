@@ -237,6 +237,7 @@ Supported provider keys currently include:
 - `mistral`
 - `groq`
 - `cerebras`
+- `cursor`
 - `xai`
 - `openrouter`
 - `vercel-ai-gateway`
