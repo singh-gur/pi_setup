@@ -208,14 +208,19 @@ Current shared package config:
     "npm:@ifi/oh-pi-themes": true,
     "npm:@eliemessiecode/pi-code-theme": true,
     "npm:@haispeed/pi-deck": true,
-    "npm:pi-ask-user": true,
+    "npm:pi-ask-user": false,
+    "npm:@juicesharp/rpiv-ask-user-question": true,
     "npm:pi-subagents": true,
-    "npm:@ifi/pi-plan": true,
-    "npm:pi-mono-clear": true,
+    "npm:@ifi/pi-plan": false,
+    "npm:pi-mono-clear": false,
     "npm:@zenobius/pi-worktrees": true,
-    "npm:@codexstar/pi-listen": true,
-    "npm:@sherif-fanous/pi-catppuccin": true,
-    "npm:pi-lens": true
+    "npm:@codexstar/pi-listen": false,
+    "npm:@sherif-fanous/pi-catppuccin": false,
+    "npm:pi-lens": false,
+    "npm:@juicesharp/rpiv-todo": false,
+    "npm:pi-cursor-sdk": true,
+    "npm:pi-hud": true,
+    "npm:@juicesharp/rpiv-advisor": true
   }
 }
 ```

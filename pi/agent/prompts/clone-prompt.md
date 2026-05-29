@@ -9,12 +9,12 @@ Your task is to study the current repository and generate polished prompts that 
 
 User-supplied context for this run: $@
 
-Start by using the `ask_user` tool to ask a compact set of high-value clarifying questions before deep repository analysis.
+Start by using the `ask_user_question` tool to ask a compact set of high-value clarifying questions before deep repository analysis.
 
 Questioning rules:
 
 - Ask no more than 4 questions total.
-- Ask exactly one focused question per `ask_user` call.
+- Ask multiple focused questions in one `ask_user_question` call where practical.
 - Prefer concise multiple-choice options while allowing freeform answers.
 - Cover these areas as efficiently as possible:
   - desired similarity level: near-clone, inspired-by, or same concept with improvements
@@ -77,7 +77,7 @@ Output format:
 
 Rules:
 
-- Use the `ask_user` tool before deep analysis unless all required answers are already explicit in the user-supplied context.
+- Use the `ask_user_question` tool before deep analysis unless all required answers are already explicit in the user-supplied context.
 - Keep questioning short and high-signal.
 - Avoid vague language like "make something like this"; spell out the important qualities.
 - Do not expose secrets or inspect sensitive local files such as `.env`, credentials, SSH keys, kubeconfigs, or auth stores.

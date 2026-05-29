@@ -11,12 +11,12 @@ User-supplied context for this run: $@
 
 ## Intake (required before pipeline work)
 
-Start by using the `ask_user` tool to collect pipeline requirements before generating CI configuration.
+Start by using the `ask_user_question` tool to collect pipeline requirements before generating CI configuration.
 
 Questioning rules:
 
-- Ask exactly one focused question per `ask_user` call.
-- Ask no more than 6 questions total unless a prior answer is too vague to proceed safely.
+- Ask multiple focused questions in one `ask_user_question` call where practical.
+- Ask no more than 4 questions total unless a prior answer is too vague to proceed safely.
 - Prefer concise multiple-choice options while allowing freeform answers.
 - If user-supplied context already clearly answers an area, skip that question.
 - Do not read secrets, `.env`, credentials, kubeconfigs, or auth stores to fill gaps; ask the user for sanitized placeholders instead.
@@ -97,7 +97,7 @@ After intake:
 
 ## Rules
 
-- Use the `ask_user` tool before generating pipelines unless all four intake areas are already explicit in user-supplied context.
+- Use the `ask_user_question` tool before generating pipelines unless all four intake areas are already explicit in user-supplied context.
 - Keep pipeline changes minimal and aligned with repository conventions.
 - Do not commit or push unless the user explicitly asks.
 - Do not expose or request raw secret values in chat; use placeholders and document secret names for the CI platform.
