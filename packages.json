@@ -5,7 +5,7 @@
     "npm:@haispeed/pi-deck": true,
     "npm:pi-ask-user": true,
     "npm:pi-subagents": true,
-    "npm:@ifi/pi-plan": true,
+    "npm:@ifi/pi-plan": false,
     "npm:pi-mono-clear": false,
     "npm:@zenobius/pi-worktrees": true,
     "npm:@codexstar/pi-listen": false,
