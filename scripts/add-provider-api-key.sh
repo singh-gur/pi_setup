@@ -250,6 +250,63 @@ prompt_model_ids() {
   printf '%s' "$model_ids"
 }
 
+prompt_positive_int() {
+  local prompt="$1"
+  local default_value="$2"
+  local value=""
+
+  read -r -p "$prompt [$default_value]: " value
+  value="$(trim "$value")"
+  value="${value:-$default_value}"
+
+  [[ "$value" =~ ^[1-9][0-9]*$ ]] || die "$prompt must be a positive integer"
+  printf '%s' "$value"
+}
+
+prompt_model_token_limits() {
+  local choice=""
+  local context_window=""
+  local max_tokens=""
+
+  printf 'Model token presets:\n' >&2
+  printf '  1) Standard coding (128k context, 16k output)\n' >&2
+  printf '  2) Small/local (32k context, 4k output)\n' >&2
+  printf '  3) Large coding (200k context, 32k output)\n' >&2
+  printf '  4) Huge context (1M context, 64k output)\n' >&2
+  printf '  5) Custom values\n' >&2
+  printf '\n' >&2
+
+  read -r -p 'Token preset [1]: ' choice
+  choice="$(trim "$choice")"
+  case "${choice:-1}" in
+    1|standard|coding)
+      context_window=128000
+      max_tokens=16384
+      ;;
+    2|small|local)
+      context_window=32000
+      max_tokens=4096
+      ;;
+    3|large)
+      context_window=200000
+      max_tokens=32000
+      ;;
+    4|huge|very-large)
+      context_window=1000000
+      max_tokens=65536
+      ;;
+    5|custom)
+      context_window="$(prompt_positive_int 'Context window tokens' 128000)"
+      max_tokens="$(prompt_positive_int 'Max output tokens' 16384)"
+      ;;
+    *)
+      die "unknown token preset: $choice"
+      ;;
+  esac
+
+  printf '%s %s\n' "$context_window" "$max_tokens"
+}
+
 write_auth_file() {
   local provider="$1"
   local api_key="$2"
@@ -274,6 +331,8 @@ write_models_file() {
   local model_ids="$7"
   local reasoning="$8"
   local image_input="$9"
+  local context_window="${10}"
+  local max_tokens="${11}"
 
   require_python
   mkdir -p "$TARGET_PI_DIR"
@@ -289,7 +348,9 @@ write_models_file() {
     --auth-header "$auth_header" \
     --local-compat "$local_compat" \
     --reasoning "$reasoning" \
-    --image-input "$image_input"
+    --image-input "$image_input" \
+    --context-window "$context_window" \
+    --max-tokens "$max_tokens"
 }
 
 setup_auth_provider() {
@@ -310,6 +371,8 @@ setup_models_provider() {
   local model_ids
   local reasoning=0
   local image_input=0
+  local context_window
+  local max_tokens
 
   log "configuring local models.json; this is machine-local and is not synced by install.sh"
   provider="$(prompt_models_provider)"
@@ -334,8 +397,9 @@ setup_models_provider() {
   if prompt_yes_no 'Do these model(s) support image input?' n; then
     image_input=1
   fi
+  read -r context_window max_tokens < <(prompt_model_token_limits)
 
-  write_models_file "$provider" "$base_url" "$api_type" "$api_key_value" "$auth_header" "$local_compat" "$model_ids" "$reasoning" "$image_input"
+  write_models_file "$provider" "$base_url" "$api_type" "$api_key_value" "$auth_header" "$local_compat" "$model_ids" "$reasoning" "$image_input" "$context_window" "$max_tokens"
 }
 
 main() {

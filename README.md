@@ -241,7 +241,7 @@ Then rerun:
 `./scripts/add-provider-api-key.sh` can configure local provider auth and custom model definitions without making them repo-managed. It delegates JSON updates to `scripts/update-provider-config.py`.
 
 - `--auth` prompts for a documented provider key and a hidden API key, then updates `~/.pi/agent/auth.json` using the `api_key` auth type expected by pi.
-- `--models` prompts for a provider key, base URL, API type, API key config value, and model IDs, then updates `~/.pi/agent/models.json` using the pi models config format from <https://pi.dev/docs/latest/models>.
+- `--models` prompts for a provider key, base URL, API type, API key config value, model IDs, and a human-friendly token preset (or custom context/output token values), then updates `~/.pi/agent/models.json` using the pi models config format from <https://pi.dev/docs/latest/models>.
 - `--both` runs both flows.
 
 Supported auth provider keys currently include:
@@ -277,14 +277,18 @@ For custom providers/models, the script writes `~/.pi/agent/models.json` like th
       "api": "openai-completions",
       "apiKey": "ollama",
       "models": [
-        { "id": "llama3.1:8b" }
+        {
+          "id": "llama3.1:8b",
+          "contextWindow": 128000,
+          "maxTokens": 16384
+        }
       ]
     }
   }
 }
 ```
 
-The `models.json` helper supports the documented API types `openai-completions`, `openai-responses`, `anthropic-messages`, and `google-generative-ai`. It preserves existing providers/models, upserts model IDs for the selected provider, backs up any existing `models.json`, and writes the file with `0600` permissions. Prefer `$ENV_VAR`, `${ENV_VAR}`, or `!command` API key config values instead of storing raw secrets in `models.json`.
+The `models.json` helper supports the documented API types `openai-completions`, `openai-responses`, `anthropic-messages`, and `google-generative-ai`. It offers token presets: Standard coding (`contextWindow: 128000`, `maxTokens: 16384`), Small/local (`32000`, `4096`), Large coding (`200000`, `32000`), Huge context (`1000000`, `65536`), or custom positive integer values. It preserves existing providers/models, upserts model IDs for the selected provider, backs up any existing `models.json`, and writes the file with `0600` permissions. Prefer `$ENV_VAR`, `${ENV_VAR}`, or `!command` API key config values instead of storing raw secrets in `models.json`.
 
 ## Notes
 

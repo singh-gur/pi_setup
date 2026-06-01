@@ -23,6 +23,16 @@ def parse_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError("expected 0 or 1")
 
 
+def parse_positive_int(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("expected a positive integer") from exc
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("expected a positive integer")
+    return parsed
+
+
 def load_object(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -158,6 +168,8 @@ def update_models(args: argparse.Namespace) -> None:
             model_config["reasoning"] = True
         if args.image_input:
             model_config["input"] = ["text", "image"]
+        model_config["contextWindow"] = args.context_window
+        model_config["maxTokens"] = args.max_tokens
 
         if model_id in positions and isinstance(merged_models[positions[model_id]], dict):
             updated = dict(merged_models[positions[model_id]])
@@ -197,6 +209,8 @@ def build_parser() -> argparse.ArgumentParser:
     models_parser.add_argument("--local-compat", type=parse_bool, required=True)
     models_parser.add_argument("--reasoning", type=parse_bool, required=True)
     models_parser.add_argument("--image-input", type=parse_bool, required=True)
+    models_parser.add_argument("--context-window", type=parse_positive_int, required=True)
+    models_parser.add_argument("--max-tokens", type=parse_positive_int, required=True)
     models_parser.set_defaults(func=update_models)
 
     return parser
