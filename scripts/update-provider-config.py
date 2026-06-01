@@ -162,6 +162,9 @@ def update_models(args: argparse.Namespace) -> None:
             positions[model["id"]] = len(merged_models)
         merged_models.append(model)
 
+    existing_model_count = len(merged_models)
+    added_model_count = 0
+    updated_model_count = 0
     for model_id in model_ids:
         model_config: dict[str, Any] = {"id": model_id}
         if args.reasoning:
@@ -175,16 +178,23 @@ def update_models(args: argparse.Namespace) -> None:
             updated = dict(merged_models[positions[model_id]])
             updated.update(model_config)
             merged_models[positions[model_id]] = updated
+            updated_model_count += 1
         else:
             positions[model_id] = len(merged_models)
             merged_models.append(model_config)
+            added_model_count += 1
 
     provider_config["models"] = merged_models
     providers[args.provider] = provider_config
     atomic_write_json(models_path, data)
 
+    preserved_model_count = existing_model_count - updated_model_count
     print(f"{LOG_PREFIX} wrote models provider '{args.provider}' to {models_path}")
     print(f"{LOG_PREFIX} model ids: {', '.join(model_ids)}")
+    print(
+        f"{LOG_PREFIX} merged models: preserved {preserved_model_count}, "
+        f"updated {updated_model_count}, added {added_model_count}"
+    )
     print(f"{LOG_PREFIX} permissions set to 0600")
 
 
