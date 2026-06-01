@@ -14,7 +14,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
   - `update` — sync config, run `pi update`, and update external skills
   - `full` — install or update pi itself, then run package and external skill updates
   - `clean` — back up and replace repo-managed config targets, reinstall configured packages, and sync external skills
-- `just add-provider` — interactively add or replace an API-key provider entry in local `auth.json`
+- `just add-provider` — interactively configure local provider auth in `auth.json` and custom providers/models in `models.json`
 - `just check` — validate scripts and JSON config
 
 ## Important Files
@@ -24,7 +24,8 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - `packages.json` — shared pi packages to sync, using boolean enable flags per package name (`true` installs if missing, `false` removes if installed)
 - `skills-install.json` — external skills to sync, using boolean enable flags per skill name (`true` installs if missing, `false` removes if installed)
 - `scripts/install-skills.sh` — external skills sync helper
-- `scripts/add-provider-api-key.sh` — local auth helper
+- `scripts/add-provider-api-key.sh` — interactive local provider auth and custom models helper
+- `scripts/update-provider-config.py` — JSON updater used by the provider setup helper
 - `scripts/merge-json.py` — JSON merge helper for managed config
 - `pi/agent/` — repo-managed pi config content
 - `pi/agent/prompts/` — managed global prompt templates for pi
@@ -34,7 +35,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - Keep `AGENTS.md` aligned with the repo's real workflows, files, commands, and maintenance expectations whenever they change.
 - Update this root `AGENTS.md` in the same unit of work when changes would otherwise make its instructions stale, misleading, or incomplete.
 - Keep `README.md` aligned with actual installer behavior, commands, packages, prompts, skills, and prerequisites.
-- Do not make the installer sync or modify `auth.json` or `sessions/`.
+- Do not make the installer sync or modify `auth.json`, `models.json`, or `sessions/`.
 - `pi/agent/settings.json` is merged into the target `settings.json`; do not change this behavior in docs without changing the code.
 - Prefer precise edits to existing files; use full rewrites only when necessary.
 - Preserve existing shell style in scripts unless a broader refactor is explicitly requested.

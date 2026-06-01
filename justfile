@@ -20,7 +20,7 @@ install mode="":
       *) echo "Unknown install mode: {{ mode }}"; exit 1 ;;
     esac
 
-# Interactively add or replace an API-key provider entry in ~/.pi/agent/auth.json.
+# Interactively configure provider auth and custom models in ~/.pi/agent.
 add-provider:
     ./scripts/add-provider-api-key.sh
 
@@ -29,5 +29,6 @@ check:
     bash -n install.sh
     bash -n scripts/add-provider-api-key.sh
     bash -n scripts/install-skills.sh
+    python3 scripts/update-provider-config.py --help >/dev/null
     jq empty packages.json
     jq empty skills-install.json

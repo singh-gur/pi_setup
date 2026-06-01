@@ -14,8 +14,9 @@ This repo is the source of truth for my global pi coding agent setup.
 - installs missing enabled external skills declared in `skills-install.json` via the `skills` CLI
 - removes installed external skills that are explicitly disabled in `skills-install.json`
 - optionally runs a global skills update before syncing configured external skills
+- includes a local helper for provider API keys and custom `models.json` entries
 
-It intentionally does **not** touch local machine data like `auth.json` or the `sessions/` folder in the target pi directory.
+It intentionally does **not** touch local machine data like `auth.json`, `models.json`, or the `sessions/` folder in the target pi directory.
 
 ## Repo layout
 
@@ -28,7 +29,8 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
 ├── scripts/
 │   ├── add-provider-api-key.sh
 │   ├── install-skills.sh
-│   └── merge-json.py
+│   ├── merge-json.py
+│   └── update-provider-config.py
 └── pi/
     └── agent/
         ├── AGENTS.md
@@ -67,9 +69,10 @@ On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by d
 Protected target paths that are never modified by the installer:
 
 - `~/.pi/agent/auth.json`
+- `~/.pi/agent/models.json`
 - `~/.pi/agent/sessions/`
 
-The installer never changes `auth.json`. If you explicitly want to add an API-key provider entry, use `./scripts/add-provider-api-key.sh`.
+The installer never changes provider auth or local model configuration. If you explicitly want to add an API-key provider entry or custom provider/model entry, use `./scripts/add-provider-api-key.sh`.
 
 ## Usage
 
@@ -91,7 +94,7 @@ just install symlink  # sync config using symlinks instead of copies
 just install update   # run `pi update` and update external skills while syncing
 just install full     # install/update pi, then update packages and external skills
 just install clean    # back up/reinstall repo-managed config and configured packages
-just add-provider     # run the auth helper
+just add-provider     # configure provider auth or custom models
 just check            # validate scripts and JSON config
 ```
 
@@ -107,10 +110,12 @@ Options:
 ./install.sh --pi-dir ~/.config/pi/agent
 ```
 
-Add or replace an API-key provider entry in `~/.pi/agent/auth.json` interactively:
+Configure provider auth or custom providers/models interactively:
 
 ```bash
-./scripts/add-provider-api-key.sh
+./scripts/add-provider-api-key.sh          # choose auth, models, or both
+./scripts/add-provider-api-key.sh --auth   # update ~/.pi/agent/auth.json
+./scripts/add-provider-api-key.sh --models # update ~/.pi/agent/models.json
 ```
 
 If `skills-install.json` exists, the installer also attempts to install each missing enabled external skill and remove each installed disabled external skill by calling `./scripts/install-skills.sh --optional`:
@@ -143,7 +148,7 @@ If you also want to run `pi update` after package sync:
 ./install.sh --update-packages
 ```
 
-If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json` or `sessions/`:
+If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json`, `models.json`, or `sessions/`:
 
 ```bash
 just install clean
@@ -231,11 +236,15 @@ Then rerun:
 ./install.sh
 ```
 
-## Provider auth helper
+## Provider setup helper
 
-`./scripts/add-provider-api-key.sh` prompts for a documented provider key and a hidden API key, then updates `~/.pi/agent/auth.json` using the `api_key` auth type expected by pi.
+`./scripts/add-provider-api-key.sh` can configure local provider auth and custom model definitions without making them repo-managed. It delegates JSON updates to `scripts/update-provider-config.py`.
 
-Supported provider keys currently include:
+- `--auth` prompts for a documented provider key and a hidden API key, then updates `~/.pi/agent/auth.json` using the `api_key` auth type expected by pi.
+- `--models` prompts for a provider key, base URL, API type, API key config value, and model IDs, then updates `~/.pi/agent/models.json` using the pi models config format from <https://pi.dev/docs/latest/models>.
+- `--both` runs both flows.
+
+Supported auth provider keys currently include:
 
 - `anthropic`
 - `azure-openai-responses`
@@ -258,6 +267,25 @@ Supported provider keys currently include:
 
 The script preserves other auth entries, backs up any existing `auth.json`, and writes the file with `0600` permissions.
 
+For custom providers/models, the script writes `~/.pi/agent/models.json` like this:
+
+```json
+{
+  "providers": {
+    "ollama": {
+      "baseUrl": "http://localhost:11434/v1",
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "models": [
+        { "id": "llama3.1:8b" }
+      ]
+    }
+  }
+}
+```
+
+The `models.json` helper supports the documented API types `openai-completions`, `openai-responses`, `anthropic-messages`, and `google-generative-ai`. It preserves existing providers/models, upserts model IDs for the selected provider, backs up any existing `models.json`, and writes the file with `0600` permissions. Prefer `$ENV_VAR`, `${ENV_VAR}`, or `!command` API key config values instead of storing raw secrets in `models.json`.
+
 ## Notes
 
 - `skills-install.json` is optional; an empty object means no external skills are installed or removed
@@ -266,11 +294,12 @@ The script preserves other auth entries, backs up any existing `auth.json`, and 
 - `skills-install.json` should map repository URLs to `"skill-name": true|false` entries; legacy skill name arrays are still treated as enabled skills
 - `jq` is required to parse `packages.json` and `skills-install.json`
 - `npx` is required to run the `skills` CLI installer
-- `python3` is required for `settings.json` merges and the auth helper
+- `python3` is required for `settings.json` merges and the provider setup helper
+- `models.json` is treated as machine-local provider configuration and is protected from installer syncs like `auth.json`
 - Default pi global config dir: `~/.pi/agent`
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
 - Existing conflicting files are backed up with a `.bak.TIMESTAMP` suffix
-- `--clean` backs up existing repo-managed config targets with a `.bak.TIMESTAMP` suffix before reinstalling them, skips `auth.json` and `sessions/`, removes configured pi packages, and installs enabled packages again
+- `--clean` backs up existing repo-managed config targets with a `.bak.TIMESTAMP` suffix before reinstalling them, skips `auth.json`, `models.json`, and `sessions/`, removes configured pi packages, and installs enabled packages again
 - External skill install and removal failures are reported, but the installer continues with other configured skills
 - Shared package installs and removals are skipped when `pi` is not yet on `PATH`
 - `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one

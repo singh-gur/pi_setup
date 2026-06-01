@@ -16,6 +16,7 @@ SYNC_MODE="copy"
 BACKUP_SUFFIX="$(date +%Y%m%d-%H%M%S)"
 PROTECTED_TARGETS=(
 	"auth.json"
+	"models.json"
 	"sessions"
 )
 MERGED_JSON_TARGETS=(
