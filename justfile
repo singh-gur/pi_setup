@@ -4,6 +4,10 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
+# Update packages and skills.
+update:
+    @./install.sh --update-packages --update-skills
+
 # Sync repo-managed pi config, packages, and skills.
 # Modes: (none), config, skills, symlink, full, clean, update
 install mode="":
@@ -22,7 +26,7 @@ install mode="":
 
 # Interactively configure provider auth and custom models in ~/.pi/agent.
 add-provider:
-    ./scripts/add-provider-api-key.sh
+    @./scripts/add-provider-api-key.sh
 
 # Validate local helper files and JSON config without changing installed pi state.
 check:
