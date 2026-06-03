@@ -11,13 +11,21 @@ User-supplied context for this run: $@
 
 ## Intake (required before pipeline work)
 
-Start by using the `ask_user_question` tool to collect pipeline requirements before generating CI configuration.
+Start by using a user-question tool (for example `ask_user_question` or an equivalent exposed in the session) to collect pipeline requirements before generating CI configuration.
+
+### Use multi-choice when the tool supports it
+
+If the available user-question tool supports multiple-choice prompts, **use that capability whenever it helps**—do not rely on open-ended chat for decisions that have clear, finite options. This applies to intake, platform selection, quality-gate choices, and any follow-up where structured options speed a safe answer.
+
+- Present discrete options (with short labels and, when useful, a one-line description per option).
+- Still allow a freeform or “other” path when the tool supports it and the choice may not fit the listed options.
+- Do not skip the tool and ask the same material question only in prose when multi-choice would make the decision faster and clearer.
 
 Questioning rules:
 
-- Ask multiple focused questions in one `ask_user_question` call where practical.
+- Ask multiple focused questions in one user-question tool call where practical.
 - Ask no more than 4 questions total unless a prior answer is too vague to proceed safely.
-- Prefer concise multiple-choice options while allowing freeform answers.
+- Default to concise multiple-choice options for each question when the tool supports them; use freeform-only prompts when options are genuinely open-ended.
 - If user-supplied context already clearly answers an area, skip that question.
 - Do not read secrets, `.env`, credentials, kubeconfigs, or auth stores to fill gaps; ask the user for sanitized placeholders instead.
 
@@ -97,7 +105,7 @@ After intake:
 
 ## Rules
 
-- Use the `ask_user_question` tool before generating pipelines unless all four intake areas are already explicit in user-supplied context.
+- Use a user-question tool before generating pipelines unless all four intake areas are already explicit in user-supplied context; when that tool supports multiple-choice, use multi-choice for material decisions instead of unstructured chat.
 - Keep pipeline changes minimal and aligned with repository conventions.
 - Do not commit or push unless the user explicitly asks.
 - Do not expose or request raw secret values in chat; use placeholders and document secret names for the CI platform.
