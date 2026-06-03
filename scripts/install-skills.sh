@@ -93,7 +93,12 @@ list_installed_skills() {
 
   printf '%s\n' "$output" \
     | sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' \
-    | awk '/^  [^[:space:]]+ / && $1 != "Agents:" { print $1 }'
+    | awk '
+      # Skill lines: "<name><spaces><path><spaces>Agents: ..."
+      # Match lines where the first field is a non-empty, non-header word followed
+      # by whitespace, and the line contains a path with "/" (a skill path marker).
+      NF >= 2 && $1 !~ /[:\/]/ && $1 != "Agents:" && $1 != "Global" && $1 != "Skills" && $2 ~ /[\/]/ { print $1 }
+    '
 }
 
 main() {
@@ -212,8 +217,8 @@ main() {
 
   for skill_name in "${!disabled_skills[@]}"; do
     if [[ -n "${installed_skills[$skill_name]:-}" ]]; then
-      log "npx skills remove $skill_name -g -y"
-      if npx --yes skills remove "$skill_name" -g -y </dev/null; then
+      log "npx skills remove $skill_name -g -y -a pi -a universal"
+      if npx --yes skills remove "$skill_name" -g -y -a pi -a universal </dev/null; then
         removed=$((removed + 1))
         unset 'installed_skills[$skill_name]'
       else
@@ -235,8 +240,8 @@ main() {
       continue
     fi
 
-    log "npx skills add $repo_url --skill $skill_name -g -y"
-    if npx --yes skills add "$repo_url" --skill "$skill_name" -g -y </dev/null; then
+    log "npx skills add $repo_url --skill $skill_name -g -y -a pi -a universal"
+    if npx --yes skills add "$repo_url" --skill "$skill_name" -g -y -a pi -a universal </dev/null; then
       installed=$((installed + 1))
       installed_skills["$skill_name"]=1
     else

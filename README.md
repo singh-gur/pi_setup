@@ -121,9 +121,11 @@ Configure provider auth or custom providers/models interactively:
 If `skills-install.json` exists, the installer also attempts to install each missing enabled external skill and remove each installed disabled external skill by calling `./scripts/install-skills.sh --optional`:
 
 ```bash
-npx skills add <repo> --skill <skill> -g -y
-npx skills remove <skill> -g -y
+npx skills add <repo> --skill <skill> -g -y -a pi -a universal
+npx skills remove <skill> -g -y -a pi -a universal
 ```
+
+The `-a pi -a universal` flags scope each call to the `pi` agent and the universal canonical skills directory under `~/.agents/skills/`. This avoids agent entries in the `skills` CLI (such as the recently added project-only `PromptScript` entry) that fail with `does not support global skill installation` during auto-detection.
 
 ## Keeping machines in sync
 
