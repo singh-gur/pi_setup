@@ -16,6 +16,7 @@ These rules apply to all pi agents and sessions.
 ## Tool Usage
 
 - **Use Pi-Native Tools First**: Prefer pi tools over shell workarounds whenever the needed tool is available
+- **Cursor Provider Tool Preference**: When using the Cursor provider for models, prefer pi local tools before Cursor tools whenever equivalent functionality is available
 - **Read Before Modify**: Always use `read` to inspect a file before editing or overwriting it
 - **Use `edit` for Precise Changes**: Prefer `edit` for targeted modifications to existing files
 - **Use `write` Only for New Files or Full Rewrites**: Do not use `write` for small in-place changes
