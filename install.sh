@@ -13,7 +13,6 @@ UPDATE_PACKAGES=0
 UPDATE_SKILLS=0
 CLEAN=0
 SYNC_MODE="copy"
-BACKUP_SUFFIX="$(date +%Y%m%d-%H%M%S)"
 PROTECTED_TARGETS=(
 	"auth.json"
 	"models.json"
@@ -80,11 +79,10 @@ PY
 	fi
 }
 
-backup_existing() {
+remove_existing() {
 	local target="$1"
-	local backup="${target}.bak.${BACKUP_SUFFIX}"
-	mv "$target" "$backup"
-	log "backed up $target -> $backup"
+	rm -rf "$target"
+	log "removed $target"
 }
 
 ensure_parent() {
@@ -123,7 +121,7 @@ remove_target_entry() {
 	fi
 
 	if [[ -e "$target" || -L "$target" ]]; then
-		backup_existing "$target"
+		remove_existing "$target"
 	else
 		log "clean target absent $target"
 	fi
@@ -148,7 +146,7 @@ merge_json_file() {
 	fi
 
 	if [[ -e "$target" ]]; then
-		backup_existing "$target"
+		remove_existing "$target"
 	fi
 
 	mv "$temp_file" "$target"
@@ -169,7 +167,7 @@ sync_entry() {
 
 	if is_merged_json_target "$relpath"; then
 		if [[ -L "$target" ]]; then
-			backup_existing "$target"
+			remove_existing "$target"
 		fi
 		merge_json_file "$source" "$target"
 		return
@@ -182,15 +180,15 @@ sync_entry() {
 			log "ok $target"
 			return
 		fi
-		backup_existing "$target"
+		remove_existing "$target"
 	elif [[ -f "$source" && -f "$target" ]]; then
 		if cmp -s "$source" "$target" 2>/dev/null; then
 			log "ok $target"
 			return
 		fi
-		backup_existing "$target"
+		remove_existing "$target"
 	elif [[ -e "$target" ]]; then
-		backup_existing "$target"
+		remove_existing "$target"
 	fi
 
 	if [[ "$SYNC_MODE" == "symlink" ]]; then

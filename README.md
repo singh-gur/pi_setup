@@ -304,8 +304,8 @@ The `models.json` helper supports the documented API types `openai-completions`,
 - `models.json` is treated as machine-local provider configuration and is protected from installer syncs like `auth.json`
 - Default pi global config dir: `~/.pi/agent`
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
-- Existing conflicting files are backed up with a `.bak.TIMESTAMP` suffix
-- `--clean` backs up existing repo-managed config targets with a `.bak.TIMESTAMP` suffix before reinstalling them, skips `auth.json`, `models.json`, and `sessions/`, removes configured pi packages, and installs enabled packages again
+- Existing conflicting files are removed before being replaced
+- `--clean` removes repo-managed config targets before reinstalling them, skips `auth.json`, `models.json`, and `sessions/`, removes configured pi packages, and installs enabled packages again
 - External skill install and removal failures are reported, but the installer continues with other configured skills
 - Shared package installs and removals are skipped when `pi` is not yet on `PATH`
 - `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one
