@@ -11,7 +11,7 @@ User-supplied context for this run: $@
 
 ## Intake (required before pipeline work)
 
-Start by using a user-question tool (for example `ask_user_question` or an equivalent exposed in the session) to collect pipeline requirements before generating CI configuration.
+Start by using a user-question tool (for example `ask_user` or an equivalent exposed in the session) to collect pipeline requirements before generating CI configuration.
 
 ### Use multi-choice when the tool supports it
 

@@ -6,7 +6,7 @@ Review implementation progress against a plan file in this repository.
 User-supplied hint for this run: $@
 
 Follow this workflow:
-1. Use the `ask_user_question` tool before analysis to ask which plan to review.
+1. Use the `ask_user` tool before analysis to ask which plan to review.
    - Offer `PLAN.md (Recommended)` as the first option.
    - Also allow a custom plan name or relative path.
    - Ask exactly one focused question.
@@ -59,7 +59,7 @@ Your final response should include:
 - the highest-value next implementation steps based on the current repo state
 
 Rules:
-- Use `ask_user_question` before doing the main analysis.
+- Use `ask_user` before doing the main analysis.
 - Be evidence-based; do not mark work complete without repository support.
 - Prefer concise, high-signal output.
 - If an item is ambiguous or aspirational, mark it `unclear` instead of guessing.
