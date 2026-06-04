@@ -21,7 +21,9 @@ Use `ask_user` for blocking user decisions and requirements only; do not use it 
 - Use one form with 1-4 related questions. Prefer one call for the full CI intake.
 - Every question must include `type`, `id`, `header`, and `prompt`.
 - Use `type: "choice"` for fixed options. Choice questions need 2-12 `options`, each with `value` and `label`.
-- Use `type: "text"` for genuinely freeform requirements.
+- Use `multi: true` choice questions for finite sets where several answers can apply, especially artifact types and quality gates.
+- Do not turn multi-answer decisions such as artifacts or checks into `text` questions; collect extra paths/tool names/details in a separate `text` question.
+- Use `type: "text"` only for genuinely freeform requirements and details.
 - Use `multi: true` for multi-select choice questions; do **not** combine `multi: true` with `allowOther`.
 - Use `allowOther` only on single-select choice questions. For multi-select “other” details, add or reuse a separate `text` question.
 - If using `recommendation` or `initial`, ensure values exactly match option `value`s. Single-select uses a string; multi-select uses an array.
@@ -48,12 +50,25 @@ Recommended first `ask_user` form:
       "recommendation": "unsure"
     },
     {
-      "type": "text",
+      "type": "choice",
       "id": "artifacts",
       "header": "Artifacts",
-      "prompt": "What must CI build, package, publish, or deploy? Include paths, images, registries, or monorepo trigger expectations if known.",
-      "required": false,
-      "placeholder": "e.g. tests only; npm package; Docker image from ./Dockerfile; Helm chart; Terraform plan"
+      "prompt": "What must CI build, package, publish, or deploy? Select all that apply. Add paths, registries, tags, or tool details in Extra context.",
+      "multi": true,
+      "options": [
+        { "value": "tests_only", "label": "Tests/checks only" },
+        { "value": "python", "label": "Python package/wheel" },
+        { "value": "node", "label": "Node/npm package" },
+        { "value": "binary", "label": "Binary/library artifact" },
+        { "value": "container", "label": "Container image" },
+        { "value": "helm", "label": "Helm chart" },
+        { "value": "terraform", "label": "Terraform/IaC plan" },
+        { "value": "sbom", "label": "SBOM/provenance" },
+        { "value": "deploy", "label": "Deployment/promotion" },
+        { "value": "other", "label": "Other / describe in Extra context" },
+        { "value": "unsure", "label": "Unsure / recommend" }
+      ],
+      "recommendation": ["tests_only"]
     },
     {
       "type": "choice",
@@ -65,23 +80,23 @@ Recommended first `ask_user` form:
         { "value": "unit", "label": "Unit tests" },
         { "value": "integration", "label": "Integration tests" },
         { "value": "e2e", "label": "End-to-end tests" },
-        { "value": "lint", "label": "Lint" },
-        { "value": "format", "label": "Format check" },
+        { "value": "lint_format", "label": "Lint/format checks" },
         { "value": "typecheck", "label": "Type check" },
         { "value": "coverage", "label": "Coverage threshold" },
         { "value": "sast", "label": "SAST scan" },
         { "value": "sca", "label": "SCA/dependency scan" },
         { "value": "container", "label": "Container scan" },
         { "value": "faraday", "label": "Export results to Faraday" },
+        { "value": "other", "label": "Other / describe in Extra context" },
         { "value": "unsure", "label": "Unsure / recommend" }
       ],
-      "recommendation": ["unit", "lint", "sca"]
+      "recommendation": ["unit", "lint_format", "sca"]
     },
     {
       "type": "text",
       "id": "extra_context",
       "header": "Extra context",
-      "prompt": "Any branch triggers, runner constraints, secret names (names only), deployment/promotion steps, existing CI to extend, compliance, signing, provenance, retention, or unlisted quality tools?",
+      "prompt": "Add details for selected artifacts/checks: paths, package/image names, registries, branch triggers, runner constraints, secret names (names only), deployment steps, existing CI to extend, compliance, signing, provenance, retention, or unlisted tools.",
       "required": false,
       "placeholder": "Do not include raw secret values. Use secret names/placeholders only."
     }
@@ -108,7 +123,7 @@ Ask which CI flavor to target:
 
 ### 2. Tech stack and build artifacts
 
-Ask what must be built, packaged, or published. Cover as much as applies in one question, with examples in the prompt:
+Ask what must be built, packaged, or published using a `choice` question with `multi: true`. Cover as much as applies in one question, with details collected in the freeform extra-context question:
 
 - languages and runtimes (Python, Node, Go, Rust, Java, etc.)
 - package outputs (wheels, npm packages, binaries, libraries)
@@ -118,7 +133,7 @@ Ask what must be built, packaged, or published. Cover as much as applies in one 
 
 ### 3. Testing and quality gates
 
-Ask which checks must run in CI and how results should be handled:
+Ask which checks must run in CI using a `choice` question with `multi: true`, and collect result-handling details in the freeform extra-context question:
 
 - unit, integration, and end-to-end tests
 - linters, formatters, type checkers
