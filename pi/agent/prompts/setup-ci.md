@@ -11,23 +11,90 @@ User-supplied context for this run: $@
 
 ## Intake (required before pipeline work)
 
-Start by using a user-question tool (for example `ask_user` or an equivalent exposed in the session) to collect pipeline requirements before generating CI configuration.
+Start by calling the `ask_user` tool to collect CI requirements before generating CI configuration, unless all four intake areas are already explicit in user-supplied context.
 
-### Use multi-choice when the tool supports it
+Use `ask_user` for blocking user decisions and requirements only; do not use it for repository facts that can be discovered by inspecting files.
 
-If the available user-question tool supports multiple-choice prompts, **use that capability whenever it helps**—do not rely on open-ended chat for decisions that have clear, finite options. This applies to intake, platform selection, quality-gate choices, and any follow-up where structured options speed a safe answer.
+### `ask_user` usage requirements
 
-- Present discrete options (with short labels and, when useful, a one-line description per option).
-- Still allow a freeform or “other” path when the tool supports it and the choice may not fit the listed options.
-- Do not skip the tool and ask the same material question only in prose when multi-choice would make the decision faster and clearer.
+- Call the tool by its exact name: `ask_user`.
+- Use one form with 1-4 related questions. Prefer one call for the full CI intake.
+- Every question must include `type`, `id`, `header`, and `prompt`.
+- Use `type: "choice"` for fixed options. Choice questions need 2-12 `options`, each with `value` and `label`.
+- Use `type: "text"` for genuinely freeform requirements.
+- Use `multi: true` for multi-select choice questions; do **not** combine `multi: true` with `allowOther`.
+- Use `allowOther` only on single-select choice questions. For multi-select “other” details, add or reuse a separate `text` question.
+- If using `recommendation` or `initial`, ensure values exactly match option `value`s. Single-select uses a string; multi-select uses an array.
+- Set `allowDiscuss: true` when the user may need to clarify instead of submitting final answers.
+- After the tool returns, read `details.status` and `details.answersById`. Continue only when submitted answers are sufficient; stop on `cancelled` or `aborted`.
+
+Recommended first `ask_user` form:
+
+```json
+{
+  "title": "CI requirements",
+  "intro": "I need your CI preferences before I scaffold repository-specific pipeline files.",
+  "questions": [
+    {
+      "type": "choice",
+      "id": "platform",
+      "header": "CI platform",
+      "prompt": "Which CI flavor should I target?",
+      "options": [
+        { "value": "concourse", "label": "Concourse", "description": "pipeline/resources/jobs model" },
+        { "value": "forgejo", "label": "Forgejo CI", "description": "Forgejo Actions-compatible workflows" },
+        { "value": "unsure", "label": "Unsure", "description": "inspect the repo and recommend" }
+      ],
+      "recommendation": "unsure"
+    },
+    {
+      "type": "text",
+      "id": "artifacts",
+      "header": "Artifacts",
+      "prompt": "What must CI build, package, publish, or deploy? Include paths, images, registries, or monorepo trigger expectations if known.",
+      "required": false,
+      "placeholder": "e.g. tests only; npm package; Docker image from ./Dockerfile; Helm chart; Terraform plan"
+    },
+    {
+      "type": "choice",
+      "id": "quality_gates",
+      "header": "Quality gates",
+      "prompt": "Which checks should CI run? Select all that apply.",
+      "multi": true,
+      "options": [
+        { "value": "unit", "label": "Unit tests" },
+        { "value": "integration", "label": "Integration tests" },
+        { "value": "e2e", "label": "End-to-end tests" },
+        { "value": "lint", "label": "Lint" },
+        { "value": "format", "label": "Format check" },
+        { "value": "typecheck", "label": "Type check" },
+        { "value": "coverage", "label": "Coverage threshold" },
+        { "value": "sast", "label": "SAST scan" },
+        { "value": "sca", "label": "SCA/dependency scan" },
+        { "value": "container", "label": "Container scan" },
+        { "value": "faraday", "label": "Export results to Faraday" },
+        { "value": "unsure", "label": "Unsure / recommend" }
+      ],
+      "recommendation": ["unit", "lint", "sca"]
+    },
+    {
+      "type": "text",
+      "id": "extra_context",
+      "header": "Extra context",
+      "prompt": "Any branch triggers, runner constraints, secret names (names only), deployment/promotion steps, existing CI to extend, compliance, signing, provenance, retention, or unlisted quality tools?",
+      "required": false,
+      "placeholder": "Do not include raw secret values. Use secret names/placeholders only."
+    }
+  ],
+  "allowDiscuss": true
+}
+```
 
 Questioning rules:
 
-- Ask multiple focused questions in one user-question tool call where practical.
 - Ask no more than 4 questions total unless a prior answer is too vague to proceed safely.
-- Default to concise multiple-choice options for each question when the tool supports them; use freeform-only prompts when options are genuinely open-ended.
-- If user-supplied context already clearly answers an area, skip that question.
-- Do not read secrets, `.env`, credentials, kubeconfigs, or auth stores to fill gaps; ask the user for sanitized placeholders instead.
+- If user-supplied context already clearly answers an area, omit that question from the tool call.
+- Do not read secrets, `.env`, credentials, kubeconfigs, or auth stores to fill gaps; ask the user for sanitized placeholders or secret names instead.
 
 Collect answers across these areas:
 
@@ -105,7 +172,7 @@ After intake:
 
 ## Rules
 
-- Use a user-question tool before generating pipelines unless all four intake areas are already explicit in user-supplied context; when that tool supports multiple-choice, use multi-choice for material decisions instead of unstructured chat.
+- Use the `ask_user` tool before generating pipelines unless all four intake areas are already explicit in user-supplied context; use valid `choice` questions for material fixed decisions instead of unstructured chat.
 - Keep pipeline changes minimal and aligned with repository conventions.
 - Do not commit or push unless the user explicitly asks.
 - Do not expose or request raw secret values in chat; use placeholders and document secret names for the CI platform.
