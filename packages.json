@@ -16,6 +16,7 @@
     "npm:pi-cursor-sdk": false,
     "npm:@offbynan/pi-cursor-provider": true,
     "npm:pi-hud": true,
-    "npm:@juicesharp/rpiv-advisor": true
+    "npm:@juicesharp/rpiv-advisor": true,
+    "npm:pi-web-access": true
   }
 }
