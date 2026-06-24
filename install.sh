@@ -343,7 +343,7 @@ sync_pi_packages() {
 
 	if [[ "$UPDATE_PACKAGES" -eq 1 ]]; then
 		log "pi update"
-		pi update
+		pi update --extensions
 	fi
 }
 
