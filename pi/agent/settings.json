@@ -1,5 +1,5 @@
 {
-  "theme": "light/catppuccin-mocha",
+  "theme": "catppuccin-mocha/catppuccin-mocha",
   "quietStartup": true,
   "collapseChangelog": true,
   "voice": {
