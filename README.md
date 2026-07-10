@@ -11,6 +11,7 @@ This repo is the source of truth for my global pi coding agent setup.
 - removes installed shared pi packages that are explicitly disabled in `packages.json`
 - can cleanly reinstall repo-managed config targets and configured pi packages when requested
 - optionally runs `pi update` after package sync when requested
+- optionally updates pi itself and its extensions via `pi update` when requested
 - installs missing enabled external skills declared in `skills-install.json` via the `skills` CLI
 - removes installed external skills that are explicitly disabled in `skills-install.json`
 - optionally runs a global skills update before syncing configured external skills
@@ -91,7 +92,7 @@ just install          # sync config, install missing packages, install missing s
 just install config   # sync only repo-managed files under pi/agent
 just install skills   # install only external skills from skills-install.json
 just install symlink  # sync config using symlinks instead of copies
-just install update   # run `pi update` and update external skills while syncing
+just install update   # update pi, its extensions, and external skills while syncing
 just install full     # install/update pi, then update packages and external skills
 just install clean    # back up/reinstall repo-managed config and configured packages
 just add-provider     # configure provider auth or custom models
@@ -103,6 +104,7 @@ Options:
 ```bash
 ./install.sh --symlink            # symlink instead of copy
 ./install.sh --install-pi         # also install/update pi via the official installer
+./install.sh --update             # update pi itself and its extensions via pi update
 ./install.sh --config-only        # sync only repo-managed config files
 ./install.sh --clean              # back up/reinstall repo-managed config and configured packages
 ./install.sh --update-packages    # run `pi update` after package sync
@@ -160,6 +162,12 @@ If you also want to install or update pi itself:
 
 ```bash
 ./install.sh --install-pi
+```
+
+If you prefer to update pi itself and its extensions via `pi update` without the official installer reinstall:
+
+```bash
+./install.sh --update
 ```
 
 ## External skills

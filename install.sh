@@ -8,6 +8,7 @@ PACKAGES_FILE="$REPO_DIR/packages.json"
 SKILLS_INSTALL_FILE="$REPO_DIR/skills-install.json"
 MERGE_JSON_SCRIPT="$REPO_DIR/scripts/merge-json.py"
 INSTALL_PI=0
+UPDATE_PI=0
 CONFIG_ONLY=0
 UPDATE_PACKAGES=0
 UPDATE_SKILLS=0
@@ -48,6 +49,7 @@ Options:
   --pi-dir <path>      Override target pi config dir
   --symlink            Symlink files instead of copying them
   --install-pi         Install/update pi via the official https://pi.dev/install.sh installer
+  --update             Run pi update (pi itself) then pi update --extensions
   --config-only        Sync only repo-managed pi config files
   --clean              Remove repo-managed config targets before syncing and reinstall configured pi packages
   --update-packages    Run pi update once after package sync to update installed pi packages
@@ -57,6 +59,7 @@ Options:
 Examples:
   ./install.sh
   ./install.sh --install-pi
+  ./install.sh --update
   ./install.sh --symlink
   ./install.sh --config-only
   ./install.sh --clean
@@ -215,6 +218,24 @@ install_pi() {
 	curl -fsSL https://pi.dev/install.sh | sh
 }
 
+update_pi() {
+	if [[ "$UPDATE_PI" -ne 1 ]]; then
+		log "pi update disabled; use --update to enable it"
+		return
+	fi
+
+	if ! command -v pi >/dev/null 2>&1; then
+		warn "pi is not available on PATH yet; skipping pi update"
+		return
+	fi
+
+	log "pi update"
+	pi update
+
+	log "pi update --extensions"
+	pi update --extensions
+}
+
 sync_pi_config() {
 	[[ -d "$SOURCE_PI_DIR" ]] || die "missing source config dir: $SOURCE_PI_DIR"
 
@@ -371,6 +392,10 @@ parse_args() {
 			INSTALL_PI=1
 			shift
 			;;
+		--update)
+			UPDATE_PI=1
+			shift
+			;;
 		--config-only)
 			CONFIG_ONLY=1
 			shift
@@ -411,6 +436,7 @@ main() {
 	fi
 
 	install_pi
+	update_pi
 	sync_pi_config
 
 	if [[ "$CONFIG_ONLY" -ne 1 ]]; then

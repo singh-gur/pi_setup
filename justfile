@@ -4,9 +4,9 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
-# Update packages and skills.
+# Update pi itself, its extensions, and external skills.
 update:
-    @./install.sh --update-packages --update-skills
+    @./install.sh --update --update-skills
 
 # Sync repo-managed pi config, packages, and skills.
 # Modes: (none), config, skills, symlink, full, clean, update
@@ -18,7 +18,7 @@ install mode="":
       config) ./install.sh --config-only ;;
       skills) ./scripts/install-skills.sh ;;
       symlink) ./install.sh --symlink ;;
-      update) ./install.sh --update-packages --update-skills ;;
+      update) ./install.sh --update --update-skills ;;
       full) ./install.sh --install-pi --update-packages --update-skills ;;
       clean) ./install.sh --clean ;;
       *) echo "Unknown install mode: {{ mode }}"; exit 1 ;;
