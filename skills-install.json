@@ -3,6 +3,8 @@
     "super-plan": true,
     "simple-plan": true,
     "caveman": true,
-    "arch-design": true
+    "arch-design": true,
+    "draw-diagram": true,
+    "spec-writer": true
   }
 }
