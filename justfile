@@ -9,13 +9,14 @@ update:
     @./install.sh --update --update-skills
 
 # Sync repo-managed pi config, packages, and skills.
-# Modes: (none), config, skills, symlink, full, clean, update
+# Modes: (none), config, packages, skills, symlink, full, clean, update
 install mode="":
     #!/usr/bin/env bash
     set -euo pipefail
     case "{{ mode }}" in
       "") ./install.sh ;;
       config) ./install.sh --config-only ;;
+      packages) ./install.sh --packages-only ;;
       skills) ./scripts/install-skills.sh ;;
       symlink) ./install.sh --symlink ;;
       update) ./install.sh --update --update-skills ;;

@@ -90,6 +90,7 @@ Or use the helper `justfile`:
 just                  # show available recipes
 just install          # sync config, install missing packages, install missing skills
 just install config   # sync only repo-managed files under pi/agent
+just install packages # sync only shared pi packages from packages.json
 just install skills   # install only external skills from skills-install.json
 just install symlink  # sync config using symlinks instead of copies
 just install update   # update pi, its extensions, and external skills while syncing
@@ -106,6 +107,7 @@ Options:
 ./install.sh --install-pi         # also install/update pi via the official installer
 ./install.sh --update             # update pi itself and its extensions via pi update
 ./install.sh --config-only        # sync only repo-managed config files
+./install.sh --packages-only      # sync only shared pi packages from packages.json
 ./install.sh --clean              # back up/reinstall repo-managed config and configured packages
 ./install.sh --update-packages    # run `pi update` after package sync
 ./install.sh --update-skills      # run `npx skills update -g` before syncing configured skills
@@ -240,10 +242,11 @@ Current shared package config:
 }
 ```
 
-Then rerun:
+Then sync only the shared packages:
 
 ```bash
-./install.sh
+just install packages
+# or: ./install.sh --packages-only
 ```
 
 ## Provider setup helper

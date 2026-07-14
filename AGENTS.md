@@ -9,6 +9,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - `just install` — sync repo-managed config, install missing shared packages, install missing external skills
 - `just install <mode>` — run install with a specific mode:
   - `config` — sync only repo-managed files under `pi/agent`
+  - `packages` — sync only shared pi packages from `packages.json`
   - `skills` — install only external skills from `skills-install.json`
   - `symlink` — sync config using symlinks instead of copies
   - `update` — sync config, update pi and its extensions via `pi update`, and update external skills

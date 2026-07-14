@@ -10,6 +10,7 @@ MERGE_JSON_SCRIPT="$REPO_DIR/scripts/merge-json.py"
 INSTALL_PI=0
 UPDATE_PI=0
 CONFIG_ONLY=0
+PACKAGES_ONLY=0
 UPDATE_PACKAGES=0
 UPDATE_SKILLS=0
 CLEAN=0
@@ -51,6 +52,7 @@ Options:
   --install-pi         Install/update pi via the official https://pi.dev/install.sh installer
   --update             Run pi update (pi itself) then pi update --extensions
   --config-only        Sync only repo-managed pi config files
+  --packages-only      Sync only shared pi packages from packages.json
   --clean              Remove repo-managed config targets before syncing and reinstall configured pi packages
   --update-packages    Run pi update once after package sync to update installed pi packages
   --update-skills      Run npx skills update -g before installing missing configured skills
@@ -62,6 +64,7 @@ Examples:
   ./install.sh --update
   ./install.sh --symlink
   ./install.sh --config-only
+  ./install.sh --packages-only
   ./install.sh --clean
   ./install.sh --update-packages
   ./install.sh --update-skills
@@ -400,6 +403,10 @@ parse_args() {
 			CONFIG_ONLY=1
 			shift
 			;;
+		--packages-only)
+			PACKAGES_ONLY=1
+			shift
+			;;
 		--clean)
 			CLEAN=1
 			shift
@@ -433,6 +440,12 @@ main() {
 	log "mode: $SYNC_MODE"
 	if [[ "$CLEAN" -eq 1 ]]; then
 		log "clean: enabled"
+	fi
+
+	if [[ "$PACKAGES_ONLY" -eq 1 ]]; then
+		sync_pi_packages
+		log "done"
+		return
 	fi
 
 	install_pi
