@@ -18,5 +18,7 @@
     "npm:pi-hud": true,
     "npm:@juicesharp/rpiv-advisor": true,
     "npm:pi-web-access": true
+    "npm:@ff-labs/pi-fff": true,
+    "npm:@dietrichgebert/ponytail": true
   }
 }
