@@ -1,7 +1,6 @@
 {
   "https://github.com/singh-gur/agent_skills": {
-    "super-plan": true,
-    "simple-plan": true,
+    "plan": true,
     "caveman": true,
     "arch-design": true,
     "draw-diagram": true,
