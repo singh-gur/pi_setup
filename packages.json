@@ -12,6 +12,7 @@
     "npm:pi-mcp-adapter": true,
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
+    "npm:@lnilluv/pi-opencode-go-rotation": true,
     "npm:@offbynan/pi-cursor-provider": false,
     "npm:@codexstar/pi-listen": false,
     "npm:@ifi/pi-plan": false,
