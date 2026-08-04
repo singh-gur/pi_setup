@@ -13,6 +13,7 @@
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
     "npm:@lnilluv/pi-opencode-go-rotation": true,
+    "npm:pi-model-control": true,
     "npm:@offbynan/pi-cursor-provider": false,
     "npm:@codexstar/pi-listen": false,
     "npm:@ifi/pi-plan": false,
