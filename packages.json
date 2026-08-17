@@ -13,6 +13,7 @@
     "npm:pi-web-access": true,
     "npm:@lnilluv/pi-opencode-go-rotation": true,
     "npm:pi-model-control": true,
+    "npm:@juicesharp/rpiv-btw": true,
     "npm:pi-hud": false,
     "npm:@offbynan/pi-cursor-provider": false,
     "npm:@codexstar/pi-listen": false,
