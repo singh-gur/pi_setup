@@ -6,6 +6,6 @@
     "draw-diagram": true,
     "spec-writer": true,
     "skill-writer": true,
-    "dispatch": true
+    "agent-loadout": true
   }
 }
