@@ -191,9 +191,15 @@ Current external skills config:
 ```json
 {
   "https://github.com/singh-gur/agent_skills": {
-    "super-plan": true,
-    "simple-plan": true,
-    "caveman": true
+    "plan": true,
+    "caveman": true,
+    "arch-design": true,
+    "draw-diagram": true,
+    "spec-writer": true,
+    "skill-writer": true,
+    "agent-loadout": true,
+    "superwork": true,
+    "cybersec-review": true
   }
 }
 ```
