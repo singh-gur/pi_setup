@@ -12,7 +12,7 @@
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
     "npm:@lnilluv/pi-opencode-go-rotation": true,
-    "npm:pi-model-control": true,
+    "npm:pi-model-control": false,
     "npm:@juicesharp/rpiv-btw": true,
     "npm:pi-hud": false,
     "npm:@offbynan/pi-cursor-provider": false,
