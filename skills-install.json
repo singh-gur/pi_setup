@@ -9,6 +9,7 @@
     "agent-loadout": true,
     "alignment-interview": true,
     "superwork": true,
-    "cybersec-review": true
+    "cybersec-review": true,
+    "setup-ci": true
   }
 }

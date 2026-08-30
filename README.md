@@ -39,8 +39,8 @@ It intentionally does **not** touch local machine data like `auth.json`, `models
         │   ├── clone-prompt.md
         │   ├── gitship.md
         │   ├── init-just.md
-        │   ├── plan-progress.md
-        │   └── setup-ci.md
+        │   ├── jjship.md
+        │   └── plan-progress.md
         └── settings.json
 ```
 
@@ -58,8 +58,8 @@ Current repo-managed prompts include:
 - `/clone-prompt` via `pi/agent/prompts/clone-prompt.md` for studying the current repo and generating reusable prompts for building a similar project
 - `/gitship` via `pi/agent/prompts/gitship.md` for staging relevant work, creating a meaningful commit, and pushing, asking for confirmation only when real concerns are detected
 - `/init-just` via `pi/agent/prompts/init-just.md` for creating a practical project `justfile` with documented tasks and a default task list
+- `/jjship` via `pi/agent/prompts/jjship.md` for describing the working-copy change, updating bookmarks, and pushing via jj, asking for confirmation only when real concerns are detected
 - `/plan-progress` via `pi/agent/prompts/plan-progress.md` for reviewing a plan file against current repository progress with evidence-backed status reporting
-- `/setup-ci` via `pi/agent/prompts/setup-ci.md` for gathering CI requirements (Concourse or Forgejo CI) and scaffolding pipelines with testing and security gates
 
 On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default.
 
