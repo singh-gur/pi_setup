@@ -10,6 +10,7 @@
     "alignment-interview": true,
     "superwork": true,
     "cybersec-review": true,
-    "setup-ci": true
+    "setup-ci": true,
+    "arcane-compose": true
   }
 }
