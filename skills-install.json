@@ -11,6 +11,7 @@
     "superwork": true,
     "cybersec-review": true,
     "setup-ci": true,
-    "arcane-compose": true
+    "arcane-compose": true,
+    "kaneo-tracker": true
   }
 }
