@@ -13,17 +13,7 @@
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
     "npm:@lnilluv/pi-opencode-go-rotation": true,
-    "npm:pi-model-control": false,
+    "git:github.com/singh-gur/pi-usage": true,
     "npm:@juicesharp/rpiv-btw": true,
-    "npm:pi-hud": false,
-    "npm:@offbynan/pi-cursor-provider": false,
-    "npm:@codexstar/pi-listen": false,
-    "npm:@ifi/pi-plan": false,
-    "npm:@juicesharp/rpiv-ask-user-question": false,
-    "npm:@juicesharp/rpiv-todo": false,
-    "npm:@sherif-fanous/pi-catppuccin": false,
-    "npm:pi-cursor-sdk": false,
-    "npm:pi-lens": false,
-    "npm:pi-mono-clear": false
   }
 }
