@@ -2,6 +2,7 @@
   "theme": "catppuccin-mocha/catppuccin-mocha",
   "quietStartup": true,
   "collapseChangelog": true,
+  "tuiMode": "fullscreen",
   "voice": {
     "toggleShortcut": "ctrl+shift+o"
   }
