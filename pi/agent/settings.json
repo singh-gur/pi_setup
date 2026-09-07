@@ -3,6 +3,7 @@
   "quietStartup": true,
   "collapseChangelog": true,
   "tuiMode": "fullscreen",
+  "fullscreenCopyOnSelect": false,
   "voice": {
     "toggleShortcut": "ctrl+shift+o"
   }
