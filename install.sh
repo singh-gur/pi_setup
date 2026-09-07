@@ -23,6 +23,9 @@ PROTECTED_TARGETS=(
 MERGED_JSON_TARGETS=(
 	"settings.json"
 )
+# Only this subtree of the target agents/ directory is repo-managed; all other
+# user agents are preserved across copy, symlink, repeat, and clean syncs.
+MANAGED_AGENTS_REL="agents/workbench"
 
 log() {
 	printf '[pi-setup] %s\n' "$*"
@@ -130,6 +133,16 @@ remove_target_entry() {
 		remove_existing "$target"
 	else
 		log "clean target absent $target"
+	fi
+}
+
+validate_agents_parent() {
+	local agents_target="$TARGET_PI_DIR/agents"
+	if [[ -L "$agents_target" ]]; then
+		die "refusing to sync agents: $agents_target is a symlink; remove it or point --pi-dir at a real directory"
+	fi
+	if [[ -e "$agents_target" && ! -d "$agents_target" ]]; then
+		die "refusing to sync agents: $agents_target exists and is not a directory"
 	fi
 }
 
@@ -242,14 +255,20 @@ update_pi() {
 sync_pi_config() {
 	[[ -d "$SOURCE_PI_DIR" ]] || die "missing source config dir: $SOURCE_PI_DIR"
 
+	# Refuse unsafe target agents/ parents before any config mutation.
+	validate_agents_parent
+
 	mkdir -p "$TARGET_PI_DIR"
 
+	# agents/ is excluded from top-level enumeration and synced only as the
+	# managed agents/workbench subtree so other user agents are never replaced.
 	if [[ "$CLEAN" -eq 1 ]]; then
 		log "cleaning repo-managed pi config targets"
 		while IFS= read -r relpath; do
 			[[ -n "$relpath" ]] || continue
 			remove_target_entry "$TARGET_PI_DIR/$relpath" "$relpath"
-		done < <(cd "$SOURCE_PI_DIR" && find . -mindepth 1 -maxdepth 1 | sed 's#^./##' | sort)
+		done < <(cd "$SOURCE_PI_DIR" && find . -mindepth 1 -maxdepth 1 ! -name agents | sed 's#^./##' | sort)
+		remove_target_entry "$TARGET_PI_DIR/$MANAGED_AGENTS_REL" "$MANAGED_AGENTS_REL"
 	fi
 
 	while IFS= read -r relpath; do
@@ -257,7 +276,15 @@ sync_pi_config() {
 		local source="$SOURCE_PI_DIR/$relpath"
 		local target="$TARGET_PI_DIR/$relpath"
 		sync_entry "$source" "$target" "$relpath"
-	done < <(cd "$SOURCE_PI_DIR" && find . -mindepth 1 -maxdepth 1 | sed 's#^./##' | sort)
+	done < <(cd "$SOURCE_PI_DIR" && find . -mindepth 1 -maxdepth 1 ! -name agents | sed 's#^./##' | sort)
+
+	sync_managed_agents_subtree
+}
+
+sync_managed_agents_subtree() {
+	local source="$SOURCE_PI_DIR/$MANAGED_AGENTS_REL"
+	[[ -d "$source" ]] || die "missing managed agents subtree: $source"
+	sync_entry "$source" "$TARGET_PI_DIR/$MANAGED_AGENTS_REL" "$MANAGED_AGENTS_REL"
 }
 
 sync_pi_packages() {
@@ -447,6 +474,10 @@ main() {
 		log "done"
 		return
 	fi
+
+	# Refuse unsafe target agents/ parents before install_pi/update_pi can
+	# mutate installed state; sync_pi_config re-checks before config mutation.
+	validate_agents_parent
 
 	install_pi
 	update_pi

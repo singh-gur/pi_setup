@@ -53,6 +53,18 @@ These rules apply to all pi agents and sessions.
 - Preserve and update lockfiles through the package manager so dependency versions stay resolved and reproducible
 - Only edit dependency manifest files directly when the package manager cannot express the needed change, and explain why
 
+## Workbench Subagent Specialists
+
+Four optional native specialists are installed under `agents/workbench/` by the `pi_setup` repo: `workbench-plan-auditor`, `workbench-brief-analyst`, `workbench-diagram-producer`, and `workbench-verification-runner`.
+
+- Routing to them is optional, not a mandatory fanout. Use one when a task matches its role; otherwise work normally.
+- Before launching any specialist, run a discovery preflight (`subagent({ action: "list", capabilities: true })`) and treat discovery or launch failures as blockers, not reasons to switch execution modes.
+- `workbench-plan-auditor`: read-only plan audits against the repository, including Workhorse/Smart handoff readiness. Returns evidence, gaps, and minimal corrections; it never writes plans or chooses phases.
+- `workbench-brief-analyst`: read-only analysis of briefs or specs for contradictions, assumptions, and dependency-ready questions. It never interviews the user, decides scope, or writes briefs.
+- `workbench-diagram-producer`: writer that executes an approved semantic diagram brief via the `draw-diagram` skill. It requires an approved tool/layout choice and authorized paths and escalates missing decisions.
+- `workbench-verification-runner`: read-only runner for approved verify commands, reporting exact commands, exits, and pass/fail/not-run verdicts. It supplements — never silently replaces — Superwork root gates and the reviewer, and never claims phase completion.
+- These specialists pin no models or thinking levels; native named settings (`subagents.agentOverrides`) and per-run `subagent` overrides remain authoritative. They sit outside current Agent Loadout tiers, which map only built-in roles and reject custom agent names. Existing parent workflows, approvals, and decision ownership are unchanged.
+
 ## Documentation & Usage Accuracy
 
 - When building with or advising on specs, interfaces, CLI tools, APIs, frameworks, or libraries, verify expected usage against available documentation, schemas, source definitions, or built-in help text before making assumptions

@@ -6,6 +6,7 @@ This repo is the source of truth for my global pi coding agent setup.
 
 - syncs repo-managed global pi config from `pi/agent/` into `~/.pi/agent` by default
 - merges repo-managed `settings.json` into the target `settings.json` instead of replacing it wholesale
+- installs four repo-managed native custom agents under `agents/workbench/` while preserving every other user agent in the target `agents/` directory
 - optionally installs or updates pi using the official `https://pi.dev/install.sh` installer when requested
 - installs missing enabled shared pi packages listed in `packages.json`
 - removes installed shared pi packages that are explicitly disabled in `packages.json`
@@ -35,6 +36,12 @@ It intentionally does **not** touch local machine data like `auth.json`, `models
 └── pi/
     └── agent/
         ├── AGENTS.md
+        ├── agents/
+        │   └── workbench/
+        │       ├── brief-analyst.md
+        │       ├── diagram-producer.md
+        │       ├── plan-auditor.md
+        │       └── verification-runner.md
         ├── prompts/
         │   ├── clone-prompt.md
         │   ├── gitship.md
@@ -61,7 +68,7 @@ Current repo-managed prompts include:
 - `/jjship` via `pi/agent/prompts/jjship.md` for describing the working-copy change, updating bookmarks, and pushing via jj, asking for confirmation only when real concerns are detected
 - `/plan-progress` via `pi/agent/prompts/plan-progress.md` for reviewing a plan file against current repository progress with evidence-backed status reporting
 
-On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default.
+On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default, with one exception: the `agents/` top-level entry is never replaced wholesale. Only the managed `agents/workbench/` subtree is synced (copied, or symlinked in symlink mode), so every other agent under `~/.pi/agent/agents/` is preserved across new installs, repeat updates, symlink/copy transitions, and `--clean`. Retired files inside `agents/workbench/` are removed by whole-subtree replacement; unrelated sibling agents are untouched. The installer refuses to proceed if the target `agents/` path is a symlink or a non-directory, before mutating any config or running `--install-pi`/`--update`, so it never follows an agents symlink into an unrelated tree.
 
 `settings.json` is special-cased and deep-merged into the target file so existing local settings can coexist with repo-managed defaults. Other top-level items are copied or symlinked as requested.
 
@@ -72,6 +79,33 @@ Protected target paths that are never modified by the installer:
 - `~/.pi/agent/sessions/`
 
 The installer never changes provider auth or local model configuration. If you explicitly want to add an API-key provider entry or custom provider/model entry, use `./scripts/add-provider-api-key.sh`.
+
+## Repo-managed custom agents
+
+Four native custom agents live in `pi/agent/agents/workbench/` and install into `~/.pi/agent/agents/workbench/`, where the pi-subagents extension discovers user agents recursively (`agents/**/*.md`):
+
+| Agent | Role |
+| --- | --- |
+| `workbench-plan-auditor` | Read-only plan audits grounded in the actual repository, including Workhorse deterministic vs Smart bounded-choice handoff readiness. Returns evidence, gaps, and minimal corrections; never writes plans or chooses phases. |
+| `workbench-brief-analyst` | Read-only analysis of a brief or spec: material contradictions, load-bearing assumptions, and dependency-ready questions for the parent session. Never interviews the user, decides scope, or writes briefs. |
+| `workbench-diagram-producer` | Writer that executes an approved semantic diagram brief using the `draw-diagram` skill. Requires an approved brief, chosen tool/layout, and authorized paths; generates, renders, and visually inspects source, render, and icon provenance; no architecture changes. |
+| `workbench-verification-runner` | Read-only runner for parent-approved verification commands and diagnostics. Reports exact commands, exit codes, and pass/fail/not-run verdicts with environmental blockers; never fixes, installs, deploys, cleans up, or claims phase completion. |
+
+All four advertise themselves for parent-prompt discovery (`advertise: true`), default to fresh context unless overridden (explicit launch context or named settings), inherit project and global context but not the skills catalog (`inheritSkills: false`), declare strict tool allowlists, pin no model or thinking level, and cannot spawn nested subagents.
+
+Discovery and reload:
+
+- after installing or changing agent files, restart pi or run `/reload`; the advertised catalog refreshes at session start/reload
+- before launching a specialist, the parent confirms it is executable with `subagent({ action: "list", capabilities: true })`
+- the installer owns only `agents/workbench/`; any other agents you keep in `~/.pi/agent/agents/` are yours and are never removed or replaced
+
+Model overrides and Agent Loadout:
+
+- the agent files deliberately pin no `model`, `thinking`, or `fallbackModels`, so local settings stay authoritative: `subagents.defaultModel` and `subagents.agentOverrides.<name>` in `~/.pi/agent/settings.json` (merged during ordinary installs, so unowned local overrides survive), plus per-run `subagent` launch overrides. Current Agent Loadout tiers map only their built-in roles (`scout`/`delegate`/`researcher`/`worker`/`reviewer`/`oracle`) and reject custom agent names, so these `workbench-*` specialists sit outside Agent Loadout and require the native named settings or per-run overrides above
+- `--clean` retains its existing settings-reset behavior: it removes the target `settings.json` before syncing, so local overrides are not preserved in that mode; use an ordinary install to keep them
+- removing a local override restores normal native precedence: `subagents.defaultModel` when configured, otherwise the parent session model (absent higher-priority provider-scoped overrides) — never a pinned one
+
+Shell caveat: `workbench-verification-runner` and `workbench-diagram-producer` have `bash`. The shell is not a sandbox, so both are constrained by their prompts to parent-approved commands/paths only; treat their command reports as evidence, not as a security boundary.
 
 ## Usage
 
@@ -95,7 +129,7 @@ just install update   # update pi, its extensions, and external skills while syn
 just install full     # install/update pi, then update packages and external skills
 just install clean    # back up/reinstall repo-managed config and configured packages
 just add-provider     # configure provider auth or custom models
-just check            # validate scripts and JSON config
+just check            # validate scripts, installer regression tests, and JSON config
 ```
 
 Options:
@@ -321,6 +355,8 @@ The `models.json` helper supports the documented API types `openai-completions`,
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
 - Existing conflicting files are removed before being replaced
 - `--clean` removes repo-managed config targets before reinstalling them, skips `auth.json`, `models.json`, and `sessions/`, removes configured pi packages, and installs enabled packages again
+- `--clean` removes only the managed `agents/workbench/` subtree, never the whole target `agents/` directory
+- `scripts/test-install.py` runs config-only installer regression tests against disposable temp dirs (agents ownership, settings merge, symlink/copy transitions, refusal cases) and is wired into `just check`
 - External skill install and removal failures are reported, but the installer continues with other configured skills
 - Shared package installs and removals are skipped when `pi` is not yet on `PATH`
 - `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one

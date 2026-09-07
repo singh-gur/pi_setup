@@ -16,7 +16,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
   - `full` — install or update pi itself, then run package and external skill updates
   - `clean` — back up and replace repo-managed config targets, reinstall configured packages, and sync external skills
 - `just add-provider` — interactively configure local provider auth in `auth.json` and custom providers/models in `models.json`
-- `just check` — validate scripts and JSON config
+- `just check` — validate scripts, installer regression tests, and JSON config
 
 ## Important Files
 
@@ -28,8 +28,10 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - `scripts/add-provider-api-key.sh` — interactive local provider auth and custom models helper
 - `scripts/update-provider-config.py` — JSON updater used by the provider setup helper
 - `scripts/merge-json.py` — JSON merge helper for managed config
+- `scripts/test-install.py` — stdlib regression tests for config-only installs (agents ownership, settings merge, symlink/copy transitions, refusal cases)
 - `pi/agent/` — repo-managed pi config content
 - `pi/agent/prompts/` — managed global prompt templates for pi
+- `pi/agent/agents/workbench/` — four repo-managed native custom agents: `plan-auditor`, `brief-analyst`, `diagram-producer`, `verification-runner` (runtime names `workbench-*`)
 
 ## Repo Conventions
 
@@ -37,6 +39,8 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - Update this root `AGENTS.md` in the same unit of work when changes would otherwise make its instructions stale, misleading, or incomplete.
 - Keep `README.md` aligned with actual installer behavior, commands, packages, prompts, skills, and prerequisites.
 - Do not make the installer sync or modify `auth.json`, `models.json`, or `sessions/`.
+- The installer owns only the `agents/workbench/` subtree of the target agents directory; it must never delete or replace other user agents, and it must refuse a symlinked or non-directory target `agents/` parent before mutating anything.
+- The four `workbench-*` agent files pin no model or thinking level; local settings and model overrides stay authoritative.
 - `pi/agent/settings.json` is merged into the target `settings.json`; do not change this behavior in docs without changing the code.
 - Prefer precise edits to existing files; use full rewrites only when necessary.
 - Preserve existing shell style in scripts unless a broader refactor is explicitly requested.
@@ -48,6 +52,7 @@ Run `just check` after changing:
 
 - `install.sh`
 - anything under `scripts/`
+- `pi/agent/agents/workbench/`
 - `packages.json`
 - `skills-install.json`
 

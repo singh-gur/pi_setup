@@ -35,5 +35,6 @@ check:
     bash -n scripts/add-provider-api-key.sh
     bash -n scripts/install-skills.sh
     python3 scripts/update-provider-config.py --help >/dev/null
+    python3 scripts/test-install.py
     jq empty packages.json
     jq empty skills-install.json
