@@ -125,7 +125,7 @@ just install config   # sync only repo-managed files under pi/agent
 just install packages # sync only shared pi packages from packages.json
 just install skills   # install only external skills from skills-install.json
 just install symlink  # sync config using symlinks instead of copies
-just install update   # update pi, its extensions, and external skills while syncing
+just install update   # sync config/packages, then update pi, extensions, and external skills
 just install full     # install/update pi, then update packages and external skills
 just install clean    # back up/reinstall repo-managed config and configured packages
 just add-provider     # configure provider auth or custom models
@@ -137,7 +137,7 @@ Options:
 ```bash
 ./install.sh --symlink            # symlink instead of copy
 ./install.sh --install-pi         # also install/update pi via the official installer
-./install.sh --update             # update pi itself and its extensions via pi update
+./install.sh --update             # sync first, then update pi itself and its extensions
 ./install.sh --config-only        # sync only repo-managed config files
 ./install.sh --packages-only      # sync only shared pi packages from packages.json
 ./install.sh --clean              # back up/reinstall repo-managed config and configured packages
@@ -260,25 +260,25 @@ Current shared package config:
 ```json
 {
   "packages": {
-    "npm:@ifi/oh-pi-themes": true,
+    "npm:@dietrichgebert/ponytail": true,
     "npm:@eliemessiecode/pi-code-theme": true,
-    "npm:@haispeed/pi-deck": true,
-    "npm:pi-ask-user": false,
-    "npm:@juicesharp/rpiv-ask-user-question": true,
-    "npm:pi-subagents": true,
-    "npm:@ifi/pi-plan": false,
-    "npm:pi-mono-clear": false,
+    "npm:@ff-labs/pi-fff": true,
+    "npm:@haispeed/pi-deck": false,
+    "npm:pi-zentui": true,
+    "npm:@ifi/oh-pi-themes": true,
+    "npm:@juicesharp/rpiv-advisor": true,
+    "npm:@mrclrchtr/supi-ask-user": true,
     "npm:@zenobius/pi-worktrees": true,
-    "npm:@codexstar/pi-listen": false,
-    "npm:@sherif-fanous/pi-catppuccin": false,
-    "npm:pi-lens": false,
-    "npm:@juicesharp/rpiv-todo": false,
-    "npm:pi-cursor-sdk": true,
-    "npm:pi-hud": true,
-    "npm:@juicesharp/rpiv-advisor": true
+    "npm:pi-mcp-adapter@2.32.1": true,
+    "npm:pi-subagents": true,
+    "npm:pi-web-access": true,
+    "npm:@singh-gur/pi-usage": true,
+    "npm:@juicesharp/rpiv-btw": true
   }
 }
 ```
+
+`pi-mcp-adapter` is pinned because version 2.33.0 declares remote tarball dependencies that npm 12 rejects by default. Package sync runs before `--update`, so an existing unpinned install is replaced by the safe pin before extension updates run.
 
 Then sync only the shared packages:
 

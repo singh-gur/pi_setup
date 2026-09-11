@@ -41,6 +41,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - Do not make the installer sync or modify `auth.json`, `models.json`, or `sessions/`.
 - The installer owns only the `agents/workbench/` subtree of the target agents directory; it must never delete or replace other user agents, and it must refuse a symlinked or non-directory target `agents/` parent before mutating anything.
 - The four `workbench-*` agent files pin no model or thinking level; local settings and model overrides stay authoritative.
+- `pi-mcp-adapter` is pinned at 2.32.1 because 2.33.0 uses remote tarball dependencies rejected by npm 12; verify newer releases use registry dependencies before removing the pin.
 - `pi/agent/settings.json` is merged into the target `settings.json`; do not change this behavior in docs without changing the code.
 - Prefer precise edits to existing files; use full rewrites only when necessary.
 - Preserve existing shell style in scripts unless a broader refactor is explicitly requested.

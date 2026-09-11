@@ -480,11 +480,15 @@ main() {
 	validate_agents_parent
 
 	install_pi
-	update_pi
 	sync_pi_config
 
 	if [[ "$CONFIG_ONLY" -ne 1 ]]; then
 		sync_pi_packages
+	fi
+
+	update_pi
+
+	if [[ "$CONFIG_ONLY" -ne 1 ]]; then
 		sync_external_skills
 	fi
 
