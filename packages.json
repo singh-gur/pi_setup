@@ -13,6 +13,7 @@
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
     "npm:@singh-gur/pi-usage": true,
-    "npm:@juicesharp/rpiv-btw": true
+    "npm:@juicesharp/rpiv-btw": true,
+    "npm:pi-claude-bridge": true
   }
 }
