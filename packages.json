@@ -12,6 +12,7 @@
     "npm:pi-web-access": true,
     "npm:@singh-gur/pi-usage": true,
     "npm:@juicesharp/rpiv-btw": true,
-    "npm:pi-claude-bridge": true
+    "npm:pi-claude-bridge": true,
+    "npm:@langfuse/pi-observability-plugin": true
   }
 }
