@@ -5,7 +5,7 @@
     "npm:@ff-labs/pi-fff": true,
     "npm:pi-zentui": true,
     "npm:@ifi/oh-pi-themes": true,
-    "npm:@juicesharp/rpiv-advisor": true,
+    "npm:@juicesharp/rpiv-advisor": false,
     "npm:@mrclrchtr/supi-ask-user": true,
     "npm:pi-mcp-adapter": true,
     "npm:pi-subagents": true,
