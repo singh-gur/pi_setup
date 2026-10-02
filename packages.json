@@ -7,7 +7,7 @@
     "npm:@ifi/oh-pi-themes": true,
     "npm:@juicesharp/rpiv-advisor": false,
     "npm:@mrclrchtr/supi-ask-user": true,
-    "npm:pi-mcp-adapter": true,
+    "npm:pi-mcp-adapter": false,
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
     "npm:@singh-gur/pi-usage": true,
