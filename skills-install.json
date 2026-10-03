@@ -13,7 +13,8 @@
     "setup-ci": true,
     "arcane-compose": true,
     "kaneo-tracker": true,
-    "stl-to-scad": true
+    "stl-to-scad": true,
+    "design-scad": true
   },
   "https://github.com/vercel-labs/agent-browser": {
     "agent-browser": true
