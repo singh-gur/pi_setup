@@ -6,5 +6,8 @@
   "fullscreenCopyOnSelect": false,
   "voice": {
     "toggleShortcut": "ctrl+shift+o"
+  },
+  "warnings": {
+    "anthropicExtraUsage": false
   }
 }
