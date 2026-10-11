@@ -133,7 +133,7 @@ def test_clean_boundary() -> None:
         target = Path(tmp)
         write_agent_fixtures(target)
         (target / "auth.json").write_text("{}")
-        (target / "models.json").write_text("{}")
+        (target / "models.json").write_text('{"providers": {"local": {"x": 1}}}')
         (target / "sessions").mkdir()
         run_install(target)
         (target / MANAGED_REL / "retired.md").write_text("stale\n")
@@ -141,7 +141,9 @@ def test_clean_boundary() -> None:
         check("clean: exit 0", result.returncode == 0, result.stderr)
         check("clean: retired managed file removed", not (target / MANAGED_REL / "retired.md").exists())
         assert_agents_state(target, "clean")
-        check("clean: protected targets preserved", (target / "auth.json").is_file() and (target / "models.json").is_file() and (target / "sessions").is_dir())
+        check("clean: protected targets preserved", (target / "auth.json").is_file() and (target / "sessions").is_dir())
+        models = json.loads((target / "models.json").read_text())
+        check("clean: models.json merged, local provider kept", models["providers"].get("local") == {"x": 1} and models["providers"]["openai-codex"]["modelOverrides"]["gpt-6.1-sol"]["contextWindow"] == 1000000)
 
 
 def test_rejects_symlink_agents_parent() -> None:

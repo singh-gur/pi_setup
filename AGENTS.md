@@ -38,7 +38,7 @@ This repo manages global pi coding agent setup and syncs repo-managed files into
 - Keep `AGENTS.md` aligned with the repo's real workflows, files, commands, and maintenance expectations whenever they change.
 - Update this root `AGENTS.md` in the same unit of work when changes would otherwise make its instructions stale, misleading, or incomplete.
 - Keep `README.md` aligned with actual installer behavior, commands, packages, prompts, skills, and prerequisites.
-- Do not make the installer sync or modify `auth.json`, `models.json`, or `sessions/`.
+- Do not make the installer sync or modify `auth.json` or `sessions/`. `models.json` is deep-merged (never replaced or removed, including `--clean`) from `pi/agent/models.json`, which holds only `modelOverrides` (1M context for `openai-codex` `gpt-6.1-sol` and `gpt-6-astra`).
 - The installer owns only the `agents/workbench/` subtree of the target agents directory; it must never delete or replace other user agents, and it must refuse a symlinked or non-directory target `agents/` parent before mutating anything.
 - The four `workbench-*` agent files pin no model or thinking level; local settings and model overrides stay authoritative.
 - `pi-mcp-adapter` is pinned at 2.32.1 because 2.33.0 uses remote tarball dependencies rejected by npm 12; verify newer releases use registry dependencies before removing the pin.

@@ -18,7 +18,7 @@ This repo is the source of truth for my global pi coding agent setup.
 - optionally runs a global skills update before syncing configured external skills
 - includes a local helper for provider API keys and custom `models.json` entries
 
-It intentionally does **not** touch local machine data like `auth.json`, `models.json`, or the `sessions/` folder in the target pi directory.
+It intentionally does **not** touch local machine data like `auth.json` or the `sessions/` folder in the target pi directory.
 
 ## Repo layout
 
@@ -48,6 +48,7 @@ It intentionally does **not** touch local machine data like `auth.json`, `models
         │   ├── init-just.md
         │   ├── jjship.md
         │   └── plan-progress.md
+        ├── models.json
         └── settings.json
 ```
 
@@ -70,15 +71,14 @@ Current repo-managed prompts include:
 
 On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default, with one exception: the `agents/` top-level entry is never replaced wholesale. Only the managed `agents/workbench/` subtree is synced (copied, or symlinked in symlink mode), so every other agent under `~/.pi/agent/agents/` is preserved across new installs, repeat updates, symlink/copy transitions, and `--clean`. Retired files inside `agents/workbench/` are removed by whole-subtree replacement; unrelated sibling agents are untouched. The installer refuses to proceed if the target `agents/` path is a symlink or a non-directory, before mutating any config or running `--install-pi`/`--update`, so it never follows an agents symlink into an unrelated tree.
 
-`settings.json` is special-cased and deep-merged into the target file so existing local settings can coexist with repo-managed defaults. Other top-level items are copied or symlinked as requested.
+`settings.json` and `models.json` are special-cased and deep-merged into the target files so existing local settings and custom providers/models coexist with repo-managed defaults. The repo-managed `models.json` only sets `modelOverrides` (1M `contextWindow` for `openai-codex` `gpt-6.1-sol` and `gpt-6-astra`). Other top-level items are copied or symlinked as requested.
 
 Protected target paths that are never modified by the installer:
 
 - `~/.pi/agent/auth.json`
-- `~/.pi/agent/models.json`
 - `~/.pi/agent/sessions/`
 
-The installer never changes provider auth or local model configuration. If you explicitly want to add an API-key provider entry or custom provider/model entry, use `./scripts/add-provider-api-key.sh`.
+The installer never changes provider auth, and only merges the managed `modelOverrides` into `models.json` (other local providers/models are preserved, and `--clean` never removes it). If you explicitly want to add an API-key provider entry or custom provider/model entry, use `./scripts/add-provider-api-key.sh`.
 
 ## Repo-managed custom agents
 
@@ -186,7 +186,7 @@ If you also want to run `pi update` after package sync:
 ./install.sh --update-packages
 ```
 
-If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json`, `models.json`, or `sessions/`:
+If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json` or `sessions/` (`models.json` is merged, never removed):
 
 ```bash
 just install clean
@@ -350,11 +350,11 @@ The `models.json` helper supports the documented API types `openai-completions`,
 - `jq` is required to parse `packages.json` and `skills-install.json`
 - `npx` is required to run the `skills` CLI installer
 - `python3` is required for `settings.json` merges and the provider setup helper
-- `models.json` is treated as machine-local provider configuration and is protected from installer syncs like `auth.json`
+- `models.json` is machine-local provider configuration; the installer only deep-merges the repo-managed overrides into it, while `auth.json` stays fully protected
 - Default pi global config dir: `~/.pi/agent`
 - Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
 - Existing conflicting files are removed before being replaced
-- `--clean` removes repo-managed config targets before reinstalling them, skips `auth.json`, `models.json`, and `sessions/`, removes configured pi packages, and installs enabled packages again
+- `--clean` removes repo-managed config targets before reinstalling them, skips `auth.json` and `sessions/`, keeps `models.json` (merged only), removes configured pi packages, and installs enabled packages again
 - `--clean` removes only the managed `agents/workbench/` subtree, never the whole target `agents/` directory
 - `scripts/test-install.py` runs config-only installer regression tests against disposable temp dirs (agents ownership, settings merge, symlink/copy transitions, refusal cases) and is wired into `just check`
 - External skill install and removal failures are reported, but the installer continues with other configured skills

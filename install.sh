@@ -17,11 +17,11 @@ CLEAN=0
 SYNC_MODE="copy"
 PROTECTED_TARGETS=(
 	"auth.json"
-	"models.json"
 	"sessions"
 )
 MERGED_JSON_TARGETS=(
 	"settings.json"
+	"models.json"
 )
 # Only this subtree of the target agents/ directory is repo-managed; all other
 # user agents are preserved across copy, symlink, repeat, and clean syncs.
@@ -126,6 +126,12 @@ remove_target_entry() {
 
 	if is_protected_target "$relpath"; then
 		log "skipping protected target $target"
+		return
+	fi
+
+	# models.json holds local custom providers; merge only, never remove.
+	if [[ "$relpath" == "models.json" ]]; then
+		log "keeping local $target (merged, not cleaned)"
 		return
 	fi
 
