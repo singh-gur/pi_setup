@@ -47,7 +47,8 @@ It intentionally does **not** touch local machine data like `auth.json` or the `
         │   ├── gitship.md
         │   ├── init-just.md
         │   ├── jjship.md
-        │   └── plan-progress.md
+        │   ├── plan-progress.md
+        │   └── status.md
         ├── models.json
         └── settings.json
 ```
@@ -68,6 +69,7 @@ Current repo-managed prompts include:
 - `/init-just` via `pi/agent/prompts/init-just.md` for creating a practical project `justfile` with documented tasks and a default task list
 - `/jjship` via `pi/agent/prompts/jjship.md` for describing the working-copy change, updating bookmarks, and pushing via jj, asking for confirmation only when real concerns are detected
 - `/plan-progress` via `pi/agent/prompts/plan-progress.md` for reviewing a plan file against current repository progress with evidence-backed status reporting
+- `/status` via `pi/agent/prompts/status.md` for reporting progress and blockers of in-progress work as steering input, then resuming it
 
 On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default, with one exception: the `agents/` top-level entry is never replaced wholesale. Only the managed `agents/workbench/` subtree is synced (copied, or symlinked in symlink mode), so every other agent under `~/.pi/agent/agents/` is preserved across new installs, repeat updates, symlink/copy transitions, and `--clean`. Retired files inside `agents/workbench/` are removed by whole-subtree replacement; unrelated sibling agents are untouched. The installer refuses to proceed if the target `agents/` path is a symlink or a non-directory, before mutating any config or running `--install-pi`/`--update`, so it never follows an agents symlink into an unrelated tree.
 
