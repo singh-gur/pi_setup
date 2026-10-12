@@ -16,6 +16,6 @@
     "npm:@gotgenes/pi-anthropic-auth": true,
     "npm:@langfuse/pi-observability-plugin": true,
     "npm:@juicesharp/rpiv-todo": true,
-    "npm:pi-condense": true
+    "npm:pi-condense": false
   }
 }
