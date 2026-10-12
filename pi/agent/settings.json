@@ -4,6 +4,7 @@
   "collapseChangelog": true,
   "tuiMode": "fullscreen",
   "fullscreenCopyOnSelect": false,
+  "fullscreenWheelScrollLines": 1,
   "voice": {
     "toggleShortcut": "ctrl+shift+o"
   },
