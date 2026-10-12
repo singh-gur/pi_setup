@@ -3,7 +3,7 @@
     "npm:@dietrichgebert/ponytail": true,
     "npm:@eliemessiecode/pi-code-theme": true,
     "npm:@ff-labs/pi-fff": true,
-    "npm:pi-zentui": true,
+    "npm:pi-zentui": false,
     "npm:@ifi/oh-pi-themes": true,
     "npm:@juicesharp/rpiv-advisor": false,
     "npm:@mrclrchtr/supi-ask-user": true,
