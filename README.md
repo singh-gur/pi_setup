@@ -109,6 +109,31 @@ Model overrides and Agent Loadout:
 
 Shell caveat: `workbench-verification-runner` and `workbench-diagram-producer` have `bash`. The shell is not a sandbox, so both are constrained by their prompts to parent-approved commands/paths only; treat their command reports as evidence, not as a security boundary.
 
+## Prerequisites
+
+The scripts require bash 4.4+, Python 3.10+ (for `just check`), `jq`, `just`, `npx`, and `curl`.
+
+### macOS
+
+macOS ships bash 3.2 and Python 3.9, so `./install.sh` fails with `bad substitution` until you use Homebrew versions:
+
+```bash
+brew install bash python jq just node
+```
+
+Homebrew's bin directory must also come before `/bin` and `/usr/bin` on `PATH`. If `/opt/homebrew/bin` is not already early on `PATH`, add this to `~/.zprofile`:
+
+```bash
+eval "$(/opt/homebrew/bin/brew shellenv)"
+```
+
+Then open a new terminal tab; existing tabs and running `pi` sessions keep the old `PATH`. Verify:
+
+```bash
+command -v bash   # /opt/homebrew/bin/bash
+bash --version    # 4.4 or newer
+```
+
 ## Usage
 
 From inside this repo:
