@@ -1,351 +1,249 @@
-# pi global setup
+# pi_setup
 
-This repo is the source of truth for my global pi coding agent setup.
+**One repo. One command. The same pi coding agent on every machine.**
 
-## What this manages
+`pi_setup` is a declarative, version-controlled setup for the [pi coding agent](https://pi.dev). Clone it on a new laptop, a server, or a Mac mini, run `just install`, and you get the same config, prompts, custom agents, packages, and skills you use everywhere else. It doesn't touch your credentials or session history.
 
-- syncs repo-managed global pi config from `pi/agent/` into `~/.pi/agent` by default
-- merges repo-managed `settings.json` into the target `settings.json` instead of replacing it wholesale
-- installs four repo-managed native custom agents under `agents/workbench/` while preserving every other user agent in the target `agents/` directory
-- optionally installs or updates pi using the official `https://pi.dev/install.sh` installer when requested
-- installs missing enabled shared pi packages listed in `packages.json`
-- removes installed shared pi packages that are explicitly disabled in `packages.json`
-- can cleanly reinstall repo-managed config targets and configured pi packages when requested
-- optionally runs `pi update` after package sync when requested
-- optionally updates pi itself and its extensions via `pi update` when requested
-- installs missing enabled external skills declared in `skills-install.json` via the `skills` CLI
-- removes installed external skills that are explicitly disabled in `skills-install.json`
-- optionally runs a global skills update before syncing configured external skills
-- includes a local helper for provider API keys and custom `models.json` entries
-
-It intentionally does **not** touch local machine data like `auth.json` or the `sessions/` folder in the target pi directory.
-
-## Repo layout
-
-```text
-.
-├── install.sh
-├── justfile
-├── packages.json
-├── skills-install.json
-├── scripts/
-│   ├── add-provider-api-key.sh
-│   ├── install-skills.sh
-│   ├── merge-json.py
-│   └── update-provider-config.py
-└── pi/
-    └── agent/
-        ├── AGENTS.md
-        ├── agents/
-        │   └── workbench/
-        │       ├── brief-analyst.md
-        │       ├── diagram-producer.md
-        │       ├── plan-auditor.md
-        │       └── verification-runner.md
-        ├── prompts/
-        │   ├── clone-prompt.md
-        │   ├── gitship.md
-        │   ├── init-just.md
-        │   ├── jjship.md
-        │   ├── plan-progress.md
-        │   └── status.md
-        ├── models.json
-        └── settings.json
+```bash
+git clone git@github.com:singh-gur/pi_setup.git && cd pi_setup
+just install
 ```
 
-Add more global pi files under `pi/agent/`, for example:
+---
 
-- `pi/agent/keybindings.json`
-- `pi/agent/SYSTEM.md`
-- `pi/agent/prompts/...`
-- `pi/agent/skills/...`
-- `pi/agent/extensions/...`
-- `pi/agent/themes/...`
+## Why pi_setup
 
-Current repo-managed prompts include:
+- **Reproducible.** Config lives in git, and every machine converges on the same state with `git pull && just install`.
+- **Declarative.** Packages and skills are on/off switches in JSON. Set `true` to install a package or skill, and `false` to remove it.
+- **Non-destructive.** Your settings are deep-merged, not overwritten. `auth.json` and `sessions/` are never touched, and your own custom agents are never deleted.
+- **Ready to use.** It ships with workflow prompts, four specialist subagents, a curated package set, and an external skill catalog.
+- **Safe to rerun.** Running it again only changes what is out of date.
+- **Tested.** An installer regression suite runs with `just check`.
 
-- `/clone-prompt` via `pi/agent/prompts/clone-prompt.md` for studying the current repo and generating reusable prompts for building a similar project
-- `/gitship` via `pi/agent/prompts/gitship.md` for staging relevant work, creating a meaningful commit, and pushing, asking for confirmation only when real concerns are detected
-- `/init-just` via `pi/agent/prompts/init-just.md` for creating a practical project `justfile` with documented tasks and a default task list
-- `/jjship` via `pi/agent/prompts/jjship.md` for describing the working-copy change, updating bookmarks, and pushing via jj, asking for confirmation only when real concerns are detected
-- `/plan-progress` via `pi/agent/prompts/plan-progress.md` for reviewing a plan file against current repository progress with evidence-backed status reporting
-- `/status` via `pi/agent/prompts/status.md` for reporting progress and blockers of in-progress work as steering input, then resuming it
+## What you get
 
-On install, each top-level item in `pi/agent/` is copied into `~/.pi/agent` by default, with one exception: the `agents/` top-level entry is never replaced wholesale. Only the managed `agents/workbench/` subtree is synced (copied, or symlinked in symlink mode), so every other agent under `~/.pi/agent/agents/` is preserved across new installs, repeat updates, symlink/copy transitions, and `--clean`. Retired files inside `agents/workbench/` are removed by whole-subtree replacement; unrelated sibling agents are untouched. The installer refuses to proceed if the target `agents/` path is a symlink or a non-directory, before mutating any config or running `--install-pi`/`--update`, so it never follows an agents symlink into an unrelated tree.
+| Component | What it adds | Source |
+| --- | --- | --- |
+| **Prompt templates** | `/gitship`, `/jjship`, `/status`, `/plan-progress`, `/init-just`, `/clone-prompt` | `pi/agent/prompts/` |
+| **Specialist agents** | Plan auditor, brief analyst, diagram producer, verification runner | `pi/agent/agents/workbench/` |
+| **Global rules** | Shared agent instructions for every session | `pi/agent/AGENTS.md` |
+| **Settings** | Theme, fullscreen TUI, startup, and warning defaults | `pi/agent/settings.json` |
+| **Model overrides** | 1M context for `openai-codex` `gpt-6.1-sol` and `gpt-6-astra` | `pi/agent/models.json` |
+| **pi packages** | Subagents, web access, themes, usage tracking, todo, ask-user, and more | `packages.json` |
+| **External skills** | Planning, architecture, diagrams, security review, CI, browser automation, and more | `skills-install.json` |
+| **Provider helper** | Interactive setup for API keys and custom/local models | `scripts/add-provider-api-key.sh` |
 
-`settings.json` and `models.json` are special-cased and deep-merged into the target files so existing local settings and custom providers/models coexist with repo-managed defaults. The repo-managed `models.json` only sets `modelOverrides` (1M `contextWindow` for `openai-codex` `gpt-6.1-sol` and `gpt-6-astra`). Other top-level items are copied or symlinked as requested.
+### Prompt templates
 
-Protected target paths that are never modified by the installer:
-
-- `~/.pi/agent/auth.json`
-- `~/.pi/agent/sessions/`
-
-The installer never changes provider auth, and only merges the managed `modelOverrides` into `models.json` (other local providers/models are preserved, and `--clean` never removes it). If you explicitly want to add an API-key provider entry or custom provider/model entry, use `./scripts/add-provider-api-key.sh`.
-
-## Repo-managed custom agents
-
-Four native custom agents live in `pi/agent/agents/workbench/` and install into `~/.pi/agent/agents/workbench/`, where the pi-subagents extension discovers user agents recursively (`agents/**/*.md`):
-
-| Agent | Role |
+| Command | What it does |
 | --- | --- |
-| `workbench-plan-auditor` | Read-only plan audits grounded in the actual repository, including Workhorse deterministic vs Smart bounded-choice handoff readiness. Returns evidence, gaps, and minimal corrections; never writes plans or chooses phases. |
-| `workbench-brief-analyst` | Read-only analysis of a brief or spec: material contradictions, load-bearing assumptions, and dependency-ready questions for the parent session. Never interviews the user, decides scope, or writes briefs. |
-| `workbench-diagram-producer` | Writer that executes an approved semantic diagram brief using the `draw-diagram` skill. Requires an approved brief, chosen tool/layout, and authorized paths; generates, renders, and visually inspects source, render, and icon provenance; no architecture changes. |
-| `workbench-verification-runner` | Read-only runner for parent-approved verification commands and diagnostics. Reports exact commands, exit codes, and pass/fail/not-run verdicts with environmental blockers; never fixes, installs, deploys, cleans up, or claims phase completion. |
+| `/gitship` | Stage relevant work, write a meaningful commit, and push; stops only for real concerns |
+| `/jjship` | Describe the working-copy change, update bookmarks, and push via jj |
+| `/status` | Report progress and blockers of in-progress work, then resume it |
+| `/plan-progress` | Check a plan file against the current repository, with evidence for each status |
+| `/init-just` | Create a project `justfile` with documented tasks and a default task list |
+| `/clone-prompt` | Study the current repo and generate prompts for building something similar |
 
-All four advertise themselves for parent-prompt discovery (`advertise: true`), default to fresh context unless overridden (explicit launch context or named settings), inherit project and global context but not the skills catalog (`inheritSkills: false`), declare strict tool allowlists, pin no model or thinking level, and cannot spawn nested subagents.
-
-Discovery and reload:
-
-- after installing or changing agent files, restart pi or run `/reload`; the advertised catalog refreshes at session start/reload
-- before launching a specialist, the parent confirms it is executable with `subagent({ action: "list", capabilities: true })`
-- the installer owns only `agents/workbench/`; any other agents you keep in `~/.pi/agent/agents/` are yours and are never removed or replaced
-
-Model overrides and Agent Loadout:
-
-- the agent files deliberately pin no `model`, `thinking`, or `fallbackModels`, so local settings stay authoritative: `subagents.defaultModel` and `subagents.agentOverrides.<name>` in `~/.pi/agent/settings.json` (merged during ordinary installs, so unowned local overrides survive), plus per-run `subagent` launch overrides. Current Agent Loadout tiers map only their built-in roles (`scout`/`delegate`/`researcher`/`worker`/`reviewer`/`oracle`) and reject custom agent names, so these `workbench-*` specialists sit outside Agent Loadout and require the native named settings or per-run overrides above
-- `--clean` retains its existing settings-reset behavior: it removes the target `settings.json` before syncing, so local overrides are not preserved in that mode; use an ordinary install to keep them
-- removing a local override restores normal native precedence: `subagents.defaultModel` when configured, otherwise the parent session model (absent higher-priority provider-scoped overrides) — never a pinned one
-
-Shell caveat: `workbench-verification-runner` and `workbench-diagram-producer` have `bash`. The shell is not a sandbox, so both are constrained by their prompts to parent-approved commands/paths only; treat their command reports as evidence, not as a security boundary.
+---
 
 ## Prerequisites
 
-The scripts require bash 4.4+, Python 3.10+ (for `just check`), `jq`, `just`, `npx`, and `curl`.
+| Tool | Used for |
+| --- | --- |
+| bash 4.4+ | `install.sh` and helper scripts |
+| Python 3 (3.10+ for `just check`) | JSON merges, provider helper, regression tests |
+| `jq` | Parsing `packages.json` and `skills-install.json` |
+| `just` | Helper recipes (optional; `./install.sh` works directly) |
+| Node.js / `npx` | Installing external skills via the `skills` CLI |
+| `curl` | Installing pi with `--install-pi` |
+
+### Linux
+
+Most distributions ship a modern bash and Python. Install the rest with your package manager, for example:
+
+```bash
+sudo apt install jq just nodejs npm curl
+```
 
 ### macOS
 
-macOS ships bash 3.2 and Python 3.9, so `./install.sh` fails with `bad substitution` until you use Homebrew versions:
+macOS ships bash 3.2 and Python 3.9, so `./install.sh` fails with `bad substitution` until you switch to the Homebrew versions:
 
 ```bash
 brew install bash python jq just node
 ```
 
-Homebrew's bin directory must also come before `/bin` and `/usr/bin` on `PATH`. If `/opt/homebrew/bin` is not already early on `PATH`, add this to `~/.zprofile`:
+Homebrew must also come before `/bin` and `/usr/bin` on your `PATH`. If `/opt/homebrew/bin` isn't already near the front, add this to `~/.zprofile`:
 
 ```bash
 eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
 
-Then open a new terminal tab; existing tabs and running `pi` sessions keep the old `PATH`. Verify:
+Then **open a new terminal tab**, because existing tabs and running `pi` sessions keep the old `PATH`. Check it:
 
 ```bash
 command -v bash   # /opt/homebrew/bin/bash
 bash --version    # 4.4 or newer
 ```
 
-## Usage
+---
 
-From inside this repo:
-
-```bash
-chmod +x install.sh
-./install.sh
-```
-
-Or use the helper `justfile`:
+## Quick start
 
 ```bash
-just                  # show available recipes
-just install          # sync config, install missing packages, install missing skills
-just install config   # sync only repo-managed files under pi/agent
-just install packages # sync only shared pi packages from packages.json
-just install skills   # install only external skills from skills-install.json
-just install symlink  # sync config using symlinks instead of copies
-just install update   # sync config/packages, then update pi, extensions, and external skills
-just install full     # install/update pi, then update packages and external skills
-just install clean    # back up/reinstall repo-managed config and configured packages
-just add-provider     # configure provider auth or custom models
-just check            # validate scripts, installer regression tests, and JSON config
+just install full   # install/update pi, sync everything, update packages and skills
+pi                  # start pi, then run /login or export provider API keys
 ```
 
-Options:
+Already have pi? Use `just install` instead.
 
-```bash
-./install.sh --symlink            # symlink instead of copy
-./install.sh --install-pi         # also install/update pi via the official installer
-./install.sh --update             # sync first, then update pi itself and its extensions
-./install.sh --config-only        # sync only repo-managed config files
-./install.sh --packages-only      # sync only shared pi packages from packages.json
-./install.sh --clean              # back up/reinstall repo-managed config and configured packages
-./install.sh --update-packages    # run `pi update` after package sync
-./install.sh --update-skills      # run `npx skills update -g` before syncing configured skills
-./install.sh --pi-dir ~/.config/pi/agent
-```
+## Commands
 
-Configure provider auth or custom providers/models interactively:
+### just recipes
 
-```bash
-./scripts/add-provider-api-key.sh          # choose auth, models, or both
-./scripts/add-provider-api-key.sh --auth   # update ~/.pi/agent/auth.json
-./scripts/add-provider-api-key.sh --models # update ~/.pi/agent/models.json
-```
+| Command | What it does |
+| --- | --- |
+| `just` | List available recipes |
+| `just install` | Sync config, install missing packages, sync external skills |
+| `just install config` | Sync only repo-managed files under `pi/agent/` |
+| `just install packages` | Sync only pi packages from `packages.json` |
+| `just install skills` | Sync only external skills from `skills-install.json` |
+| `just install symlink` | Sync config as symlinks into the repo instead of copies |
+| `just install update` | Sync, then update pi, its extensions, and external skills |
+| `just install full` | Install/update pi, sync, then update packages and skills |
+| `just install clean` | Remove and reinstall managed config and configured packages |
+| `just update` | Same as `just install update` |
+| `just add-provider` | Configure provider API keys or custom models |
+| `just check` | Validate scripts and JSON, and run installer regression tests |
 
-If `skills-install.json` exists, the installer also attempts to install each missing enabled external skill and remove each installed disabled external skill by calling `./scripts/install-skills.sh --optional`:
+### install.sh flags
 
-```bash
-npx skills add <repo> --skill <skill> -g -y -a pi -a universal
-npx skills remove <skill> -g -y -a pi -a universal
-```
+| Flag | Effect |
+| --- | --- |
+| `--symlink` | Symlink files instead of copying them |
+| `--install-pi` | Install/update pi via the official `https://pi.dev/install.sh` installer |
+| `--update` | After syncing, run `pi update` and `pi update --extensions` |
+| `--config-only` | Sync only repo-managed config files |
+| `--packages-only` | Sync only pi packages |
+| `--clean` | Remove managed config targets and configured packages, then reinstall |
+| `--update-packages` | Run one `pi update --extensions` after package sync |
+| `--update-skills` | Run `npx skills update -g` before syncing skills |
+| `--pi-dir <path>` | Target a different pi config dir (or set `PI_CODING_AGENT_DIR`) |
 
-The `-a pi -a universal` flags scope each call to the `pi` agent and the universal canonical skills directory under `~/.agents/skills/`. This avoids agent entries in the `skills` CLI (such as the recently added project-only `PromptScript` entry) that fail with `does not support global skill installation` during auto-detection.
+---
 
-## Keeping machines in sync
+## How syncing works
 
-On every machine:
+By default, each top-level item in `pi/agent/` is copied into `~/.pi/agent`. Some paths get special handling:
 
-```bash
-git pull
-./install.sh
-```
+| Target path | Behavior |
+| --- | --- |
+| `settings.json` | Deep-merged. Your local keys survive; repo keys win on conflict |
+| `models.json` | Deep-merged and never removed, even by `--clean`. Your providers and models are kept |
+| `agents/workbench/` | The only part of `agents/` the installer owns. Other agents are never touched |
+| `auth.json`, `sessions/` | Protected and never read, written, or removed |
+| Everything else | Copied (or symlinked with `--symlink`). Changed files are replaced |
 
-That gives you:
+Safety guarantees:
 
-- latest repo-managed config
-- any missing enabled shared pi packages from `packages.json`
-- removal of any installed shared pi packages explicitly disabled in `packages.json`
-- any missing enabled external skills from `skills-install.json`
-- removal of any installed external skills explicitly disabled in `skills-install.json`
+- The installer refuses to run if the target `agents/` is a symlink or not a directory. It checks this before changing anything, including before `--install-pi` or `--update`.
+- `--clean` removes the target `settings.json` before re-merging, so local settings overrides are lost in that mode. Use a normal install to keep them.
+- If `pi` isn't on `PATH` yet, package sync is skipped with a warning. Failed skill installs are reported, and the installer continues with the remaining skills.
 
-If you also want to run `pi update` after package sync:
+To manage more global pi files, drop them into `pi/agent/`, for example `keybindings.json`, `SYSTEM.md`, `skills/`, `extensions/`, or `themes/`.
 
-```bash
-./install.sh --update-packages
-```
+---
 
-If you want to cleanly reinstall the repo-managed config and configured pi packages without touching `auth.json` or `sessions/` (`models.json` is merged, never removed):
+## Configuration
 
-```bash
-just install clean
-```
-
-If you also want to install or update pi itself:
-
-```bash
-./install.sh --install-pi
-```
-
-If you prefer to update pi itself and its extensions via `pi update` without the official installer reinstall:
-
-```bash
-./install.sh --update
-```
-
-## External skills
-
-Declare external skills in `skills-install.json` as a JSON object mapping repository URLs to skill-name booleans. `true` means the skill should be installed if missing; `false` means the skill should be removed if it is currently installed.
+### pi packages: `packages.json`
 
 ```json
 {
-  "https://github.com/anthropics/skills": {
-    "frontend-design": true,
-    "old-skill": false
-  },
-  "https://github.com/vercel-labs/skills": {
-    "find-skills": true
+  "packages": {
+    "npm:pi-subagents": true,
+    "npm:old-extension": false,
+    "git:github.com/user/pi-package": true
   }
 }
 ```
 
-Current external skills config:
+- `true`: installed if missing
+- `false`: removed if installed
+- Version pins work as usual, for example `npm:pkg@1.2.3`
+
+See [`packages.json`](packages.json) for the current set.
+
+### External skills: `skills-install.json`
+
+Maps repository URLs to skill switches:
 
 ```json
 {
   "https://github.com/singh-gur/agent_skills": {
     "plan": true,
-    "caveman": true,
-    "arch-design": true,
-    "draw-diagram": true,
-    "spec-writer": true,
-    "skill-writer": true,
-    "agent-loadout": true,
-    "superwork": true,
-    "cybersec-review": true
+    "old-skill": false
+  },
+  "https://github.com/vercel-labs/agent-browser": {
+    "agent-browser": true
   }
 }
 ```
 
-During `./install.sh`, each configured missing skill is installed globally for the `pi` agent via the `skills` CLI through `./scripts/install-skills.sh --optional`. If you only want to refresh external skills, run `just install skills` or `./scripts/install-skills.sh`. Add `--update-skills` if you want to run `npx skills update -g` first. If `jq` or `npx` is missing, external skill installation is skipped with a warning.
-
-## Shared pi packages
-
-Declare package sources in `packages.json` as a JSON object mapping package names to booleans. `true` means the package should be installed if missing; `false` means the package should be removed if it is currently installed, e.g.
-
-```json
-{
-  "packages": {
-    "npm:@foo/pi-tools": true,
-    "npm:@bar/pi-theme@1.2.3": false,
-    "git:github.com/user/pi-package": true,
-    "https://github.com/user/another-pi-package": true
-  }
-}
-```
-
-Current shared package config:
-
-```json
-{
-  "packages": {
-    "npm:@dietrichgebert/ponytail": true,
-    "npm:@eliemessiecode/pi-code-theme": true,
-    "npm:@ff-labs/pi-fff": true,
-    "npm:@haispeed/pi-deck": false,
-    "npm:pi-zentui": true,
-    "npm:@ifi/oh-pi-themes": true,
-    "npm:@juicesharp/rpiv-advisor": true,
-    "npm:@mrclrchtr/supi-ask-user": true,
-    "npm:@zenobius/pi-worktrees": true,
-    "npm:pi-mcp-adapter@2.32.1": true,
-    "npm:pi-subagents": true,
-    "npm:pi-web-access": true,
-    "npm:@singh-gur/pi-usage": true,
-    "npm:@juicesharp/rpiv-btw": true
-  }
-}
-```
-
-`pi-mcp-adapter` is pinned because version 2.33.0 declares remote tarball dependencies that npm 12 rejects by default. Package sync runs before `--update`, so an existing unpinned install is replaced by the safe pin before extension updates run.
-
-Then sync only the shared packages:
+Skills are installed globally with:
 
 ```bash
-just install packages
-# or: ./install.sh --packages-only
+npx skills add <repo> --skill <skill> -g -y -a pi -a universal
 ```
+
+The `-a pi -a universal` flags limit installs to pi and the shared `~/.agents/skills/` directory. This avoids `skills` CLI agents that don't support global installs. Legacy arrays of skill names are still treated as enabled. See [`skills-install.json`](skills-install.json) for the current catalog.
+
+---
+
+## Workbench specialist agents
+
+Four native custom agents install into `~/.pi/agent/agents/workbench/`, where the `pi-subagents` extension discovers them:
+
+| Agent | Role |
+| --- | --- |
+| `workbench-plan-auditor` | Read-only audit of a plan against the real repository, including Workhorse/Smart handoff readiness. Returns evidence, gaps, and minimal corrections |
+| `workbench-brief-analyst` | Read-only analysis of a brief or spec: contradictions, load-bearing assumptions, and dependency-ready questions |
+| `workbench-diagram-producer` | Turns an approved diagram brief into rendered, visually inspected diagrams via the `draw-diagram` skill |
+| `workbench-verification-runner` | Runs approved verification commands and reports exact commands, exit codes, and pass/fail/not-run verdicts |
+
+Design choices:
+
+- **No pinned models.** Your `subagents.defaultModel`, `subagents.agentOverrides.<name>`, and per-run overrides stay in control. These agents sit outside Agent Loadout tiers, which accept only built-in roles.
+- **Tight scope.** Each agent has a strict tool allowlist, starts with fresh context, doesn't inherit the skills catalog, and can't spawn nested subagents.
+- **Discoverable.** All four set `advertise: true`. After changing them, restart pi or run `/reload`. Parents confirm availability with `subagent({ action: "list", capabilities: true })`.
+
+> **Shell caveat:** `workbench-verification-runner` and `workbench-diagram-producer` have `bash`. The shell is not a sandbox; both are limited by their prompts to commands and paths the parent session approves. Treat their reports as evidence, not as a security boundary.
+
+---
 
 ## Provider setup helper
 
-`./scripts/add-provider-api-key.sh` can configure local provider auth and custom model definitions without making them repo-managed. It delegates JSON updates to `scripts/update-provider-config.py`.
+Set up API keys and custom models interactively, without committing anything to the repo:
 
-- `--auth` prompts for a documented provider key and a hidden API key, then updates `~/.pi/agent/auth.json` using the `api_key` auth type expected by pi.
-- `--models` prompts for a provider key, base URL, API type, API key config value, model IDs, and a human-friendly token preset (or custom context/output token values), then updates `~/.pi/agent/models.json` using the pi models config format from <https://pi.dev/docs/latest/models>.
-- `--both` runs both flows.
+```bash
+just add-provider                           # choose auth, models, or both
+./scripts/add-provider-api-key.sh --auth    # API key into ~/.pi/agent/auth.json
+./scripts/add-provider-api-key.sh --models  # custom provider into ~/.pi/agent/models.json
+```
 
-Supported auth provider keys currently include:
+**`--auth`** asks for a supported provider key and a hidden API key. Supported providers: `anthropic`, `azure-openai-responses`, `openai`, `google`, `mistral`, `groq`, `cerebras`, `cursor`, `xai`, `openrouter`, `vercel-ai-gateway`, `zai`, `opencode`, `opencode-go`, `huggingface`, `kimi-coding`, `minimax`, `minimax-cn`.
 
-- `anthropic`
-- `azure-openai-responses`
-- `openai`
-- `google`
-- `mistral`
-- `groq`
-- `cerebras`
-- `cursor`
-- `xai`
-- `openrouter`
-- `vercel-ai-gateway`
-- `zai`
-- `opencode`
-- `opencode-go`
-- `huggingface`
-- `kimi-coding`
-- `minimax`
-- `minimax-cn`
+**`--models`** sets up custom or local providers such as Ollama. It supports the `openai-completions`, `openai-responses`, `anthropic-messages`, and `google-generative-ai` API types, with token presets:
 
-The script preserves other auth entries, backs up any existing `auth.json`, and writes the file with `0600` permissions.
+| Preset | Context window | Max output |
+| --- | --- | --- |
+| Standard coding | 128,000 | 16,384 |
+| Small/local | 32,000 | 4,096 |
+| Large coding | 200,000 | 32,000 |
+| Huge context | 1,000,000 | 65,536 |
+| Custom | any positive integer | any positive integer |
 
-For custom providers/models, the script writes `~/.pi/agent/models.json` like this:
+Example result:
 
 ```json
 {
@@ -354,36 +252,67 @@ For custom providers/models, the script writes `~/.pi/agent/models.json` like th
       "baseUrl": "http://localhost:11434/v1",
       "api": "openai-completions",
       "apiKey": "ollama",
-      "models": [
-        {
-          "id": "llama3.1:8b",
-          "contextWindow": 128000,
-          "maxTokens": 16384
-        }
-      ]
+      "models": [{ "id": "llama3.1:8b", "contextWindow": 128000, "maxTokens": 16384 }]
     }
   }
 }
 ```
 
-The `models.json` helper supports the documented API types `openai-completions`, `openai-responses`, `anthropic-messages`, and `google-generative-ai`. It offers token presets: Standard coding (`contextWindow: 128000`, `maxTokens: 16384`), Small/local (`32000`, `4096`), Large coding (`200000`, `32000`), Huge context (`1000000`, `65536`), or custom positive integer values. It preserves existing providers/models, upserts model IDs for the selected provider, and does not remove other existing models when rerun with the same provider key. It backs up any existing `models.json` and writes the file with `0600` permissions. Prefer `$ENV_VAR`, `${ENV_VAR}`, or `!command` API key config values instead of storing raw secrets in `models.json`.
+Both flows keep existing entries, back up the file before writing, and save it with `0600` permissions. Prefer `$ENV_VAR`, `${ENV_VAR}`, or `!command` API key values over raw secrets. See the [pi models docs](https://pi.dev/docs/latest/models).
 
-## Notes
+---
 
-- `skills-install.json` is optional; an empty object means no external skills are installed or removed
-- `packages.json` is optional; missing or invalid package config is skipped with a warning
-- `packages.json` must contain a `packages` object of `"package-name": true|false` entries
-- `skills-install.json` should map repository URLs to `"skill-name": true|false` entries; legacy skill name arrays are still treated as enabled skills
-- `jq` is required to parse `packages.json` and `skills-install.json`
-- `npx` is required to run the `skills` CLI installer
-- `python3` is required for `settings.json` merges and the provider setup helper
-- `models.json` is machine-local provider configuration; the installer only deep-merges the repo-managed overrides into it, while `auth.json` stays fully protected
-- Default pi global config dir: `~/.pi/agent`
-- Override with `PI_CODING_AGENT_DIR` or `./install.sh --pi-dir ...`
-- Existing conflicting files are removed before being replaced
-- `--clean` removes repo-managed config targets before reinstalling them, skips `auth.json` and `sessions/`, keeps `models.json` (merged only), removes configured pi packages, and installs enabled packages again
-- `--clean` removes only the managed `agents/workbench/` subtree, never the whole target `agents/` directory
-- `scripts/test-install.py` runs config-only installer regression tests against disposable temp dirs (agents ownership, settings merge, symlink/copy transitions, refusal cases) and is wired into `just check`
-- External skill install and removal failures are reported, but the installer continues with other configured skills
-- Shared package installs and removals are skipped when `pi` is not yet on `PATH`
-- `--update-packages` now runs a single `pi update` after package sync instead of updating configured packages one by one
+## Keeping machines in sync
+
+```bash
+git pull && just install          # converge on the latest config
+just install update               # ...and update pi, extensions, and skills
+just install clean                # start fresh (auth, sessions, and models.json are kept)
+```
+
+## Development
+
+```bash
+just check
+```
+
+This runs:
+
+- `bash -n` on every shell script
+- A smoke test of the provider helper
+- JSON validation
+- `scripts/test-install.py`: config-only installer regression tests in disposable temp dirs, covering agent ownership, settings merge, symlink/copy transitions, and refusal cases
+
+Run it after changing `install.sh`, `scripts/`, `pi/agent/agents/workbench/`, `packages.json`, or `skills-install.json`.
+
+## Repo layout
+
+```text
+.
+├── install.sh                 # main installer
+├── justfile                   # helper recipes
+├── packages.json              # pi package switches
+├── skills-install.json        # external skill switches
+├── scripts/
+│   ├── add-provider-api-key.sh
+│   ├── install-skills.sh
+│   ├── merge-json.py
+│   ├── test-install.py
+│   └── update-provider-config.py
+└── pi/agent/                  # synced into ~/.pi/agent
+    ├── AGENTS.md
+    ├── agents/workbench/      # four specialist agents
+    ├── prompts/               # slash-command prompt templates
+    ├── models.json
+    └── settings.json
+```
+
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| `bad substitution` or `declare: -A: invalid option` | Old bash (macOS); see [macOS prerequisites](#macos) |
+| `pi is not available on PATH yet` | Run `just install full`, or add `~/.pi/agent/bin` to `PATH` |
+| Packages or skills skipped with a `jq`/`npx` warning | Install the missing tool and rerun |
+| `refusing to sync agents` | The target `agents/` is a symlink or a file; replace it with a real directory |
+| New agents or prompts not showing up | Restart pi or run `/reload` |
