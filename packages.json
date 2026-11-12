@@ -11,6 +11,7 @@
     "npm:pi-subagents": true,
     "npm:pi-web-access": true,
     "npm:@singh-gur/pi-usage": true,
+    "npm:@singh-gur/pi-session-sync": true,
     "npm:@juicesharp/rpiv-btw": false,
     "npm:pi-btw": true,
     "npm:pi-claude-bridge": false,
