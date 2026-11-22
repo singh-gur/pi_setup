@@ -19,6 +19,7 @@
     "npm:@langfuse/pi-observability-plugin": true,
     "npm:@juicesharp/rpiv-todo": true,
     "npm:pi-condense": false,
-    "npm:pi-open-tui": true
+    "npm:pi-open-tui": true,
+    "npm:pi-antigravity": true
   }
 }
