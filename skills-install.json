@@ -14,7 +14,8 @@
     "arcane-compose": true,
     "kaneo-tracker": true,
     "stl-to-scad": true,
-    "design-scad": true
+    "design-scad": true,
+    "resume-builder": true
   },
   "https://github.com/vercel-labs/agent-browser": {
     "agent-browser": true
